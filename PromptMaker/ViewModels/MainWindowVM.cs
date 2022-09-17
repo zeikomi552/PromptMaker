@@ -11,14 +11,24 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
+using System.Xml.Linq;
+using MVVMCore.Common.Wrapper;
+using System.Reflection;
 
 namespace PromptMaker.ViewModels
 {
     internal class MainWindowVM : ViewModelBase
     {
+        #region コンストラクタ
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public MainWindowVM()
         {
             Dictionary<ScriptTypeEnum, string> tmp = new Dictionary<ScriptTypeEnum, string>();
@@ -29,6 +39,7 @@ namespace PromptMaker.ViewModels
 
             this.ScriptTypeEnumEx = tmp;
         }
+        #endregion
 
         #region Enum用変数[ScriptTypeEnumEx]プロパティ
         /// <summary>
@@ -55,8 +66,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
-
         #region 共通変数
         /// <summary>
         /// 共通変数
@@ -69,7 +78,6 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
-
 
         #region 設定ファイルオブジェクト[SettingConf]プロパティ
         /// <summary>
@@ -171,7 +179,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
         #region ワードクラウド画像パス[ImagePath]プロパティ
         /// <summary>
         /// ワードクラウド画像パス[ImagePath]プロパティ用変数
@@ -250,10 +257,7 @@ namespace PromptMaker.ViewModels
         {
             Task.Run(()=>{
                 // ディレクトリパス
-                string path = this.Parameter.Txt2ImgF ?
-                    Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples")
-                    : Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
-
+                string path = GetOutputFilePath();
 
                 // DirectoryInfoのインスタンスを生成する
                 DirectoryInfo di = new DirectoryInfo(path);
@@ -261,11 +265,14 @@ namespace PromptMaker.ViewModels
                 // ディレクトリ直下のすべてのファイル一覧を取得する
                 FileInfo[] fiAlls = di.GetFiles();
 
-                // 出力先ファイルパスを取得し画面表示
-                this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
+                if (fiAlls.Length > 0)
+                {
+                    // 出力先ファイルパスを取得し画面表示
+                    this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
 
-                // ファイルリストの表示
-                this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
+                    // ファイルリストの表示
+                    this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
+                }
             });
         }
         #endregion
@@ -293,6 +300,7 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region フォルダを開く処理
         /// <summary>
         /// フォルダを開く処理
         /// </summary>
@@ -320,7 +328,14 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
+        #region ファイルを開く処理
+        /// <summary>
+        /// ファイルを開く処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ev"></param>
         public void FileOpen(object sender, EventArgs ev)
         {
             try
@@ -332,7 +347,7 @@ namespace PromptMaker.ViewModels
 
                     if (file_info != null)
                     {
-                        Process.Start("explorer.exe", file_info.FullName); // 指定したフォルダを開く
+                        Process.Start("mspaint", file_info.FullName); // 指定したフォルダを開く
                     }
                 }
 
@@ -342,7 +357,9 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
+        #region ファイル削除処理
         /// <summary>
         /// ファイル削除処理
         /// </summary>
@@ -378,6 +395,7 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
         #region 画像パスの選択変更
         /// <summary>
@@ -400,11 +418,45 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region 出力先フォルダの取得
+        /// <summary>
+        /// 出力先フォルダの取得
+        /// </summary>
+        /// <returns>出力先フォルダ</returns>
+        private string GetOutputFilePath()
+        {
+            string path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+            switch (this.Parameter.ScriptType)
+            {
+                case ScriptTypeEnum.Txt2Img:
+                default:
+                    {
+                        path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+                        PathManager.CreateDirectory(path);
+                        break;
+                    }
+                case ScriptTypeEnum.Img2Img:
+                    {
+                        path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
+                        PathManager.CreateDirectory(path);
+                        break;
+                    }
+                case ScriptTypeEnum.Inpaint:
+                    {
+                        path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
+                        PathManager.CreateDirectory(path);
+                        break;
+                    }
+            }
+            return path;
+        }
+        #endregion
+
         #region コマンドの実行
         /// <summary>
         /// コマンドの実行
         /// </summary>
-        public void Execute()
+        public void Execute(object sender, EventArgs ev)
         {
             try
             {
@@ -431,7 +483,21 @@ namespace PromptMaker.ViewModels
                     }
                 };
 
-                //string command = this.Parameter.Command!;   // コマンドの保存
+                // Inpaintingの場合のみ事前にファイルを作成する
+                if (this.Parameter.InpaintF)
+                {
+                    // ファイルコピー
+                    File.Copy(this.Parameter.InitFilePath, Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example.png"), true);
+
+                    var wnd = VisualTreeHelperWrapper.FindAncestor<Window>((Button)sender) as MainWindow;
+
+                    if (wnd != null)
+                    {
+                        var canvas = wnd!.inkCanvas;
+                        SaveCanvas(canvas, Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example_mask.png"));
+                    }
+                }
+
                 string command = this.Parameter.Command!;   // コマンドの保存
                 this.Parameter.CommandBackup = command;     // コマンドの保存
 
@@ -459,29 +525,8 @@ namespace PromptMaker.ViewModels
 
                 Console.WriteLine(myString);
 
-                string path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-                switch (this.Parameter.ScriptType)
-                {
-                    case ScriptTypeEnum.Txt2Img:
-                    default:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                    case ScriptTypeEnum.Img2Img:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                    case ScriptTypeEnum.Inpaint:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                }
+                // 出力ファイルパスを取得する
+                string path = GetOutputFilePath();
 
                 // DirectoryInfoのインスタンスを生成する
                 DirectoryInfo di = new DirectoryInfo(path);
@@ -493,7 +538,9 @@ namespace PromptMaker.ViewModels
                 RefreshImageList();
 
                 // 出力先ファイルパスを取得し画面表示
-                this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
+                string filepath = fiAlls.Last().FullName;
+                this.ImagePath = filepath;
+                this.Parameter.OutputFilePath = filepath;
 
                 // ファイルリストの表示
                 this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
@@ -501,13 +548,74 @@ namespace PromptMaker.ViewModels
                 // 最初の行に履歴を保存
                 this.History.Items.Insert(0,this.Parameter.ShallowCopy<ParameterM>());
 
-
                 // 最後に実行したプロンプトを保存
                 this.SettingConf.Item.LastPrompt = this.Parameter.Prompt;
 
                 // Composerに追加
                 SetPromptComposer(this.Parameter.Prompt);
 
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region キャンバスの保存処理
+        /// <summary>
+        /// キャンバスの保存処理
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="filePath"></param>
+        private static void SaveCanvas(UIElement element, String filePath)
+        {
+            var bounds = VisualTreeHelper.GetDescendantBounds(element);
+            var width = (int)bounds.Width;
+            var height = (int)bounds.Height;
+
+            // 描画先
+            var drawingVisual = new DrawingVisual();
+            using (var ctx = drawingVisual.RenderOpen())
+            {
+                var vb = new VisualBrush(element);
+                ctx.DrawRectangle(Brushes.Black, null, new Rect(new System.Windows.Point(width, height), new System.Windows.Point(width, height)));
+                ((InkCanvas)element).Strokes.Draw(ctx);
+            }
+
+            // ビットマップに変換
+            var rtb = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
+            rtb.Render(drawingVisual);
+
+            // エンコーダー
+            BitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            // ファイル保存
+            using (var fs = File.Create(filePath))
+            {
+                encoder.Save(fs);
+            }
+        }
+        #endregion
+
+        #region InkCanvasのオブジェクトを削除
+        /// <summary>
+        /// InkCanvasのオブジェクトを削除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ev"></param>
+        public void ClearObject(object sender, EventArgs ev)
+        {
+            try
+            {
+                var wnd = VisualTreeHelperWrapper.FindAncestor<Window>((Button)sender) as MainWindow;
+
+                if (wnd != null)
+                {
+                    var canvas = wnd!.inkCanvas;
+                    canvas.Strokes.Clear();
+                }
             }
             catch (Exception ex)
             {
@@ -562,6 +670,7 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region 行ダブルクリック時にプロンプトに追加する処理
         /// <summary>
         /// 行ダブルクリック時にプロンプトに追加する処理
         /// </summary>
@@ -584,6 +693,24 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
+
+        #region 履歴のグリッドダブルクリック時に対象の画像ファイルを開く
+        /// <summary>
+        /// 履歴のグリッドダブルクリック時に対象の画像ファイルを開く
+        /// </summary>
+        public void GridDoubleClick()
+        {
+            try
+            {
+                Process.Start("mspaint", this.History.SelectedItem.OutputFilePath); // 指定したフォルダを開く
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
 
         #region 選択行を削除する処理
         /// <summary>
@@ -644,8 +771,12 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
-
+        #region 閉じる
+        /// <summary>
+        /// 閉じる
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public override void Close(object sender, EventArgs e)
         {
             try
@@ -658,5 +789,6 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
     }
 }

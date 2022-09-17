@@ -4,6 +4,7 @@ using MVVMCore.Common.Utilities;
 using PromptMaker.Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,31 @@ namespace PromptMaker.Models
 {
     public class ParameterM : ModelBase
     {
+        #region 設定ファイルオブジェクト[SettingConf]プロパティ
+        /// <summary>
+        /// 設定ファイルオブジェクト[SettingConf]プロパティ用変数
+        /// </summary>
+        ConfigManager<SettingConfM> _SettingConf = new ConfigManager<SettingConfM>("Config", "Setting.conf", new SettingConfM());
+        /// <summary>
+        /// 設定ファイルオブジェクト[SettingConf]プロパティ
+        /// </summary>
+        public ConfigManager<SettingConfM> SettingConf
+        {
+            get
+            {
+                return _SettingConf;
+            }
+            set
+            {
+                if (_SettingConf == null || !_SettingConf.Equals(value))
+                {
+                    _SettingConf = value;
+                    NotifyPropertyChanged("SettingConf");
+                }
+            }
+        }
+        #endregion
+
         #region 幅(px)[Width]プロパティ
         /// <summary>
         /// 幅(px)[Width]プロパティ用変数
@@ -304,6 +330,7 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region Txt2Imgフラグ
         /// <summary>
         /// Txt2Imgフラグ
         /// </summary>
@@ -314,7 +341,9 @@ namespace PromptMaker.Models
                 return this.ScriptType == ScriptTypeEnum.Txt2Img;
             }
         }
+        #endregion
 
+        #region InpaintF
         /// <summary>
         /// InpaintF
         /// </summary>
@@ -325,7 +354,7 @@ namespace PromptMaker.Models
                 return this.ScriptType == ScriptTypeEnum.Inpaint;
             }
         }
-
+        #endregion
 
         #region ストレングス[Strength]プロパティ
         /// <summary>
@@ -377,8 +406,6 @@ namespace PromptMaker.Models
         }
         #endregion
 
-
-
         #region サンプル数[N_Sample]プロパティ
         /// <summary>
         /// サンプル数[N_Sample]プロパティ用変数
@@ -428,10 +455,6 @@ namespace PromptMaker.Models
             }
         }
         #endregion
-
-
-
-
 
         Random _Rand = new Random();
 
@@ -510,7 +533,6 @@ namespace PromptMaker.Models
 
         }
 
-
         /// <summary>
         /// コマンド
         /// </summary>
@@ -518,15 +540,19 @@ namespace PromptMaker.Models
         {
             get
             {
+                string indir_path = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting");
+                string outdir_path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
+
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/inpaint.py");
-                command.AppendLine($"--init-img");
-                command.AppendLine($"C:\\Work\\Develop\\StableDiffusion\\stable-diffusion\\outputs\\sampledir");
-
-
+                command.AppendLine($"--indir");
+                command.AppendLine(indir_path);
+                command.AppendLine($"--outdir");
+                command.AppendLine(outdir_path);
+                command.AppendLine($"--steps");
+                command.AppendLine($"{this.Ddim_steps}");
                 return command.ToString().Replace("\r\n", " ");
             }
-
         }
 
         /// <summary>

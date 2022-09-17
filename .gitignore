@@ -3,3 +3,9 @@
 ################################################################################
 
 /.vs
+/MVVMCore/bin/Debug/net5.0-windows
+/MVVMCore/obj/Debug/net5.0-windows
+/PromptMaker/bin/Debug/net6.0-windows
+/PromptMaker/obj/Debug/net6.0-windows
+/PromptMaker/obj
+/MVVMCore/obj

@@ -54,22 +54,7 @@
                         <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="タイプ:"/>
                         <ComboBox Margin="5" Width="100" ItemsSource="{Binding ScriptTypeEnumEx}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding Parameter.ScriptType}" Grid.Column="0"/>
                     </StackPanel>
-                    <Grid Visibility="{Binding Parameter.Img2ImgF, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="初期画像:"/>
-                        <TextBox Margin="5" Text="{Binding Parameter.InitFilePath}" Grid.Column="1"/>
-                        <Button Margin="5" Grid.Column="2" Content="ファイル" Width="100">
-                            <b:Interaction.Triggers>
-                                <b:EventTrigger EventName="Click">
-                                    <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenInitFile"/>
-                                </b:EventTrigger>
-                            </b:Interaction.Triggers>
-                        </Button>
-                    </Grid>
+
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
@@ -94,8 +79,6 @@
                         <RowDefinition Height="2*"/>
                         <RowDefinition Height="150"/>
                     </Grid.RowDefinitions>
-
-
 
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
@@ -153,8 +136,77 @@
                             </Grid>
                         </GroupBox>
 
-                        <GroupBox Visibility="{Binding Parameter.Img2ImgF, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Column="1" Margin="5,5,5,5" Header="インプット">
-                            <Image Width="450" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">
+                            <GroupBox.Style>
+                                <Style TargetType="GroupBox">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Parameter.Img2ImgF}" Value="true">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Parameter.Txt2ImgF}" Value="true">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Parameter.InpaintF}" Value="true">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </GroupBox.Style>
+                            <Grid MinWidth="200">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="初期画像:"/>
+                                    <Button Margin="5" Grid.Column="1" Content="ファイル" Width="100">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenInitFile"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Grid.Column="2" Content="クリア" Width="100">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="ClearObject"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                </Grid>
+                                <Grid Grid.Row="1">
+                                    <Image x:Name="image" Grid.Row="1" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                    <InkCanvas x:Name="inkCanvas" Grid.Row="1" Background="{x:Null}" 
+                                            Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
+                                            Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}">
+                                        <InkCanvas.DefaultDrawingAttributes>
+                                            <DrawingAttributes Color="#FFFFFF" Width="20" Height="20"/>
+                                        </InkCanvas.DefaultDrawingAttributes>
+                                        <InkCanvas.Style>
+                                            <Style TargetType="InkCanvas">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Parameter.Img2ImgF}" Value="true">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Parameter.Txt2ImgF}" Value="true">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Parameter.InpaintF}" Value="true">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </InkCanvas.Style>
+                                    </InkCanvas>
+                                </Grid>
+                            </Grid>
                         </GroupBox>
 
                         <GroupBox Grid.Column="2" Margin="5,5,5,5" Header="アウトプット">
@@ -219,7 +271,7 @@
                                             </StackPanel>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
-                                    
+
                                 </ListView>
                             </Grid>
                         </GroupBox>
@@ -287,6 +339,9 @@
                             <b:Interaction.Triggers>
                                 <b:EventTrigger EventName="SelectionChanged">
                                     <b:CallMethodAction TargetObject="{Binding}" MethodName="SelectionChanged"/>
+                                </b:EventTrigger>
+                                <b:EventTrigger EventName="MouseDoubleClick">
+                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="GridDoubleClick"/>
                                 </b:EventTrigger>
                             </b:Interaction.Triggers>
 
