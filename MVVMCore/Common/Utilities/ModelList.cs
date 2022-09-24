@@ -134,10 +134,35 @@ namespace MVVMCore.Common.Utilities
 				}
 			}
 		}
-		#endregion
+        #endregion
 
-		#region INotifyPropertyChanged 
-		public event PropertyChangedEventHandler PropertyChanged;
+        #region 選択行を削除する処理
+        /// <summary>
+        /// 選択行を削除する処理
+        /// </summary>
+        public void SelectedItemDelete()
+        {
+            try
+            {
+                // 選択行を削除
+                if (this.SelectedItem != null)
+                {
+                    var tmp = (from x in this.Items
+                               where x.Equals(this.SelectedItem)
+                               select x).First();
+                    this.Items.Remove(tmp);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region INotifyPropertyChanged 
+        public event PropertyChangedEventHandler PropertyChanged;
 
 		private void NotifyPropertyChanged(String info)
 		{

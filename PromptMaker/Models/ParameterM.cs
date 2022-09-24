@@ -43,7 +43,7 @@ namespace PromptMaker.Models
         /// <summary>
         /// 幅(px)[Width]プロパティ用変数
         /// </summary>
-        int _Width = 512;
+        int _Width = 640;
         /// <summary>
         /// 幅(px)[Width]プロパティ
         /// </summary>
@@ -68,7 +68,7 @@ namespace PromptMaker.Models
         /// <summary>
         /// 高さ(px)[Height]プロパティ用変数
         /// </summary>
-        int _Height = 384;
+        int _Height = 320;
         /// <summary>
         /// 高さ(px)[Height]プロパティ
         /// </summary>
@@ -143,7 +143,7 @@ namespace PromptMaker.Models
         /// <summary>
         /// ステップ数(数が多いほど品質が上がる)[Ddim_steps]プロパティ用変数
         /// </summary>
-        int _Ddim_steps = 100;
+        int _Ddim_steps = 75;
         /// <summary>
         /// ステップ数(数が多いほど品質が上がる)[Ddim_steps]プロパティ
         /// </summary>
@@ -435,7 +435,7 @@ namespace PromptMaker.Models
         /// <summary>
         /// 作成回数[N_iter]プロパティ用変数
         /// </summary>
-        int _N_iter = 1;
+        int _N_iter = 3;
         /// <summary>
         /// 作成回数[N_iter]プロパティ
         /// </summary>

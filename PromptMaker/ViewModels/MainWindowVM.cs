@@ -20,6 +20,9 @@ using Path = System.IO.Path;
 using System.Xml.Linq;
 using MVVMCore.Common.Wrapper;
 using System.Reflection;
+using System.Drawing;
+using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Media.TextFormatting;
 
 namespace PromptMaker.ViewModels
 {
@@ -108,7 +111,7 @@ namespace PromptMaker.ViewModels
         /// <summary>
         /// プロンプト構成要素コンフィグ[PromptComposerConf]プロパティ用変数
         /// </summary>
-        ConfigManager<ModelList<PromptConsistM>> _PromptComposerConf = new ConfigManager<ModelList<PromptConsistM>>("Config", "PromptComposer.conf",　new ModelList<PromptConsistM>());
+        ConfigManager<ModelList<PromptConsistM>> _PromptComposerConf = new ConfigManager<ModelList<PromptConsistM>>("Config", "PromptComposer.conf", new ModelList<PromptConsistM>());
         /// <summary>
         /// プロンプト構成要素コンフィグ[PromptComposerConf]プロパティ
         /// </summary>
@@ -460,6 +463,159 @@ namespace PromptMaker.ViewModels
         {
             try
             {
+                ExecuteSub(sender, ev);
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        private string _LastFilePath = string.Empty;
+
+        private string GetArticle()
+        {
+            string[] prompts = new string[] {
+                    "日本画", "油彩画", "アクリル画", "水彩画",
+                    "グアッシュ", "パステル画", "ドローイング", "リトグラフ", "シルクスクリーン",
+                    "木版画", "銅版画", "ジクレー", "ミクストメディア",
+                    "ステンドグラス"
+                };
+
+            StringBuilder txt = new StringBuilder();
+
+            foreach (var tmp in prompts)
+            {
+                txt.AppendLine($"## {tmp}");
+                txt.AppendLine($"[{tmp} - Google画像検索](https://www.google.co.jp/search?q={tmp.Replace(" ", "+")}&tbm=isch)");
+                txt.AppendLine($"[{tmp} - Wiki](https://ja.wikipedia.org/wiki/{tmp})");
+            }
+
+            return txt.ToString();
+        }
+
+
+        #region コマンドの実行
+        /// <summary>
+        /// コマンドの実行
+        /// </summary>
+        public void Execute2(object sender, EventArgs ev)
+        {
+            try
+            {
+                //string txt = GetArticle();
+
+                //string[] prompts = new string[] {
+                //    "Katsushika Hokusai", "Giuseppe Arcimboldo", "Andy Warhol", "Gustav Klimt",
+                //    "Eugène Henri Paul Gauguin", "Vincent Willem van Gogh", "Raffaello Santi", "Paul Cézanne", "Leonardo da Vinci",
+                //    "Jacques-Louis David", "Salvador Dalí", "Francisco José de Goya y Lucientes", "Ferdinand Victor Eugène Delacroix",
+                //    "Pablo Ruiz Picasso", "Camille Pissarro", "Johannes Vermeer","Pieter Bruegel", "Diego Velázquez", "Édouard Manet",
+                //    "Jean-François Millet", "Edvard Munch", "Claude Monet", "Peter Paul Rubens", "Pierre-Auguste Renoir", "Rembrandt van Rijn"
+                //};
+
+                //string[] prompts = new string[] {
+                //    "japan Painting", "Oil Painting", "Acrylic Painting", "watercolor painting",
+                //    "Gouache", "Pastel paintings", "drawing", "lithograph", "Silkscreen",
+                //    "Woodcut", "Copper engravings", "Giclee", "Mixed Media", "Stained Glass"
+                //};
+
+                //foreach (var prompt in prompts)
+                //{
+                //    this.Parameter.Prompt = "cat by " + prompt;
+                //    ExecuteSub(sender, ev, true, $"Prompt -> {this.Parameter.Prompt}\r\n{this.Parameter.Command}");
+                //}
+
+                //for (int i = 0; i < 100; i++)
+                //{
+                //    this.Parameter.Seed = 0;
+                //    ExecuteSub(sender, ev, true, $"Seed -> {i}\r\n{this.Parameter.Command}");
+                //}
+
+                var prompts = new string[,] {
+                        { "halloween", "ハロウィン" }
+                    };
+
+                var prompts2 = new string[,] {
+                        { "by Oil Painting", "油彩画" },
+                        { "by watercolor painting", "水彩画" },
+                        { "by japan Painting", "日本画" },
+                        { "by Stained Glass", "ステンドグラス" },
+                        { "by Katsushika Hokusai", "葛飾北斎" },
+                    };
+
+                int iter = 3;
+                string keyword = "stablediffusion-09";
+
+                StringBuilder text = new StringBuilder();
+
+                // 親ディレクトリ
+                var parent_dir = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+                var path = Path.Combine(parent_dir, keyword);
+
+                for (int i = 0; i < prompts.GetLength(0); i ++)
+                {
+                    var prompt = prompts[i, 0];
+                    var title = prompts[i, 1];
+
+                    text.AppendLine($"## {title}");
+
+                    for (int j = 0; j< prompts2.GetLength(0); j++)
+                    {
+                        var prompt2 = prompts2[j,0];
+                        var title2 = prompts2[j, 1];
+                        text.AppendLine($"### {title2}");
+
+                        for (int k = 1; k <= iter; k++)
+                        {
+                            this.Parameter.Seed = k;
+                            this.Parameter.Prompt = prompt + " " + prompt2;
+                            ExecuteSub(sender, ev, true, $"Prompt -> {this.Parameter.Prompt}\r\n{this.Parameter.Command}", keyword);
+
+                            // DirectoryInfoのインスタンスを生成する
+                            DirectoryInfo di = new DirectoryInfo(path);
+
+                            // ディレクトリ直下のすべてのファイル一覧を取得する
+                            FileInfo[] fiAlls = di.GetFiles();
+                            var file = fiAlls.Last();
+
+                            if (k == 1)
+                            {
+                                text.AppendLine($"Prompt:{this.Parameter.Prompt}");
+                            }
+
+                            text.AppendLine($"```");
+                            text.AppendLine($"{this.Parameter.Command}");
+                            text.AppendLine($"```");
+                            text.AppendLine($"");
+                            text.AppendLine($"[![]({keyword}/{file.Name})]({keyword}/{file.Name})");
+                        }
+                    }
+                }
+
+                File.WriteAllText(Path.Combine(parent_dir, $"{keyword}.md"), text.ToString());
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region サブ関数
+        /// <summary>
+        /// サブ関数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ev"></param>
+        /// <param name="debug_f"></param>
+        /// <param name="msg"></param>
+        /// <param name="keyword">文字列挿入画像のフォルダ名とファイルプレフィスク</param>
+        private void ExecuteSub(object sender, EventArgs ev, bool debug_f = false, string msg = "", string keyword = "debug")
+        {
+            try
+            {
                 if (this.Parameter.Img2ImgF && string.IsNullOrEmpty(this.Parameter.InitFilePath))
                 {
                     ShowMessage.ShowNoticeOK("img2imgはファイルパスが必須です", "通知");
@@ -539,25 +695,71 @@ namespace PromptMaker.ViewModels
 
                 // 出力先ファイルパスを取得し画面表示
                 string filepath = fiAlls.Last().FullName;
-                this.ImagePath = filepath;
+
+                // 画像ファイル確認
+                if (this._LastFilePath != filepath)
+                {
+                    this._LastFilePath = this.ImagePath = filepath;
+                }
+                else return;
+
                 this.Parameter.OutputFilePath = filepath;
 
                 // ファイルリストの表示
                 this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
 
                 // 最初の行に履歴を保存
-                this.History.Items.Insert(0,this.Parameter.ShallowCopy<ParameterM>());
+                this.History.Items.Insert(0, this.Parameter.ShallowCopy<ParameterM>());
 
                 // 最後に実行したプロンプトを保存
                 this.SettingConf.Item.LastPrompt = this.Parameter.Prompt;
 
-                // Composerに追加
-                SetPromptComposer(this.Parameter.Prompt);
-
+                if(debug_f)
+                {
+                    // 文字列を画像に挿入
+                    SetDetail(this._LastFilePath, msg, keyword);
+                }
             }
             catch (Exception ex)
             {
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region 画像に文字列を埋め込んで移動する処理
+        /// <summary>
+        /// 画像に文字列を埋め込んで移動する処理
+        /// </summary>
+        /// <param name="path">文字列を埋め込む元画像</param>
+        /// <param name="text">埋め込む文字列</param>
+        /// <param name="keyword">文字列を埋め込んだ画像のフォルダ名とファイル名のプレフィクスになります</param>
+        private void SetDetail(string path, string text, string keyword)
+        {
+            string filename = Path.GetFileName(path);
+            string folderPath = System.IO.Path.GetDirectoryName(path)!;
+            folderPath = Path.Combine(folderPath, keyword);
+            PathManager.CreateDirectory(folderPath);
+
+            using (var bmp = new Bitmap(path))
+            using (var fs = new FileStream(Path.Combine(folderPath, keyword + "_" + filename), FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                int resizeWidth = bmp.Width / 2;
+                int resizeHeight = bmp.Height / 2;
+                using (var resizebmp = new Bitmap(resizeWidth, resizeHeight))
+                {
+                    using (var g = Graphics.FromImage(resizebmp))
+                    {
+
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(bmp, 0, 0, resizeWidth, resizeHeight);
+                        g.DrawString(text, new Font("Arial", 12), System.Drawing.Brushes.Red, new PointF(10.0f, 10.0f));
+                    }
+
+                    fs.SetLength(0);
+
+                    resizebmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+                }
             }
         }
         #endregion
@@ -579,7 +781,7 @@ namespace PromptMaker.ViewModels
             using (var ctx = drawingVisual.RenderOpen())
             {
                 var vb = new VisualBrush(element);
-                ctx.DrawRectangle(Brushes.Black, null, new Rect(new System.Windows.Point(width, height), new System.Windows.Point(width, height)));
+                ctx.DrawRectangle(System.Windows.Media.Brushes.Black, null, new Rect(new System.Windows.Point(width, height), new System.Windows.Point(width, height)));
                 ((InkCanvas)element).Strokes.Draw(ctx);
             }
 
@@ -624,34 +826,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-        #region プロンプト構成要素に追加
-        /// <summary>
-        /// プロンプト構成要素に追加
-        /// </summary>
-        /// <param name="prompt">プロンプト</param>
-        private void SetPromptComposer(string prompt)
-        {
-            string[] composer_items = prompt.Split(",");
-
-            foreach (var composer_item in composer_items)
-            {
-                var tmp = composer_item.Trim();
-                if (!(from x in this.PromptComposerConf.Item.Items
-                     where x.Keyword.Equals(tmp)
-                     select x).Any())
-                {
-                    this.PromptComposerConf.Item.Items.Add(new PromptConsistM()
-                    { 
-                        Keyword　= tmp,
-                    });
-                }
-            }
-
-            // コンポーザーの保存
-            this.PromptComposerConf.SaveXML();
-        }
-        #endregion
-
         #region 選択行の変更
         /// <summary>
         /// 選択行の変更
@@ -670,31 +844,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-        #region 行ダブルクリック時にプロンプトに追加する処理
-        /// <summary>
-        /// 行ダブルクリック時にプロンプトに追加する処理
-        /// </summary>
-        public void PromptComposerDoubleClick()
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(this.Parameter.Prompt))
-                {
-                    this.Parameter.Prompt += this.PromptComposerConf.Item.SelectedItem.Keyword;
-                }
-                else
-                {
-                    this.Parameter.Prompt += ", " + this.PromptComposerConf.Item.SelectedItem.Keyword;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
         #region 履歴のグリッドダブルクリック時に対象の画像ファイルを開く
         /// <summary>
         /// 履歴のグリッドダブルクリック時に対象の画像ファイルを開く
@@ -704,65 +853,6 @@ namespace PromptMaker.ViewModels
             try
             {
                 Process.Start("mspaint", this.History.SelectedItem.OutputFilePath); // 指定したフォルダを開く
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
-        #region 選択行を削除する処理
-        /// <summary>
-        /// 選択行を削除する処理
-        /// </summary>
-        public void DeletePromptComposerRow()
-        {
-            try
-            {
-                // 選択行を削除
-                if (this.PromptComposerConf.Item.SelectedItem != null)
-                {
-                    var tmp = (from x in this.PromptComposerConf.Item.Items
-                     where x.Equals(this.PromptComposerConf.Item.SelectedItem)
-                     select x).First();
-                    this.PromptComposerConf.Item.Items.Remove(tmp);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
-        #region 下位の行と入れ替え
-        /// <summary>
-        /// 下位の行と入れ替え
-        /// </summary>
-        public void MoveUpPromptRow()
-        {
-            try
-            {
-                this.PromptComposerConf.Item.MoveUP();
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
-        #region 上位の行と入れ替え
-        /// <summary>
-        /// 上位の行と入れ替え
-        /// </summary>
-        public void MoveDownPromptRow()
-        {
-            try
-            {
-                this.PromptComposerConf.Item.MoveDown();
             }
             catch (Exception ex)
             {

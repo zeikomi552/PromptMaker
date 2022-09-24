@@ -9,26 +9,76 @@ namespace PromptMaker.Models
 {
     public class PromptConsistM : ModelBase
     {
-        #region キーワード[Keyword]プロパティ
+        #region 有効フラグ[IsEnable]プロパティ
         /// <summary>
-        /// キーワード[Keyword]プロパティ用変数
+        /// 有効フラグ[IsEnable]プロパティ用変数
         /// </summary>
-        string _Keyword = string.Empty;
+        bool _IsEnable = false;
         /// <summary>
-        /// キーワード[Keyword]プロパティ
+        /// 有効フラグ[IsEnable]プロパティ
         /// </summary>
-        public string Keyword
+        public bool IsEnable
         {
             get
             {
-                return _Keyword;
+                return _IsEnable;
             }
             set
             {
-                if (_Keyword == null || !_Keyword.Equals(value))
+                if (!_IsEnable.Equals(value))
                 {
-                    _Keyword = value;
-                    NotifyPropertyChanged("Keyword");
+                    _IsEnable = value;
+                    NotifyPropertyChanged("IsEnable");
+                }
+            }
+        }
+        #endregion
+
+        #region プロンプト[Prompt]プロパティ
+        /// <summary>
+        /// プロンプト[Prompt]プロパティ用変数
+        /// </summary>
+        string _Prompt = string.Empty;
+        /// <summary>
+        /// プロンプト[Prompt]プロパティ
+        /// </summary>
+        public string Prompt
+        {
+            get
+            {
+                return _Prompt;
+            }
+            set
+            {
+                if (_Prompt == null || !_Prompt.Equals(value))
+                {
+                    _Prompt = value;
+                    NotifyPropertyChanged("Prompt");
+                }
+            }
+        }
+        #endregion
+
+        #region 説明[Description]プロパティ
+        /// <summary>
+        /// 説明[Description]プロパティ用変数
+        /// </summary>
+        string _Description = string.Empty;
+        /// <summary>
+        /// 説明[Description]プロパティ
+        /// </summary>
+        public string Description
+        {
+            get
+            {
+                return _Description;
+            }
+            set
+            {
+                if (_Description == null || !_Description.Equals(value))
+                {
+                    _Description = value;
+                    NotifyPropertyChanged("Description");
                 }
             }
         }
