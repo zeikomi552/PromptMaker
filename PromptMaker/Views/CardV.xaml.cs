@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace PromptMaker.Views
 {
     /// <summary>
-    /// SettingV.xaml の相互作用ロジック
+    /// CardV.xaml の相互作用ロジック
     /// </summary>
-    public partial class SettingV : MetroWindow
+    public partial class CardV : MetroWindow
     {
-        public SettingV()
+        public CardV()
         {
             InitializeComponent();
         }

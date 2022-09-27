@@ -27,5 +27,30 @@ namespace MVVMCore.Common.Wrapper
             }
             return null;
         }
+
+        #region 最上位のWindowの取得処理
+        /// <summary>
+        /// 最上位のWindowの取得処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <returns></returns>
+        public static DependencyObject GetWindow<T>(object sender)
+        {
+            DependencyObject depobj = (DependencyObject)sender;
+            while (true)
+            {
+                depobj = VisualTreeHelper.GetParent(depobj);
+
+                if (depobj is T)
+                {
+                    return depobj;
+                }
+                else if (depobj == null)
+                {
+                    return null;
+                }
+            }
+        }
+        #endregion
     }
 }

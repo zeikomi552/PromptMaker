@@ -456,8 +456,61 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region プレフィックス(ファイル出力時のフォルダ名とファイル名接頭辞に使用する)[Prefix]プロパティ
+        /// <summary>
+        /// プレフィックス(ファイル出力時のフォルダ名とファイル名接頭辞に使用する)[Prefix]プロパティ用変数
+        /// </summary>
+        string _Prefix = "output";
+        /// <summary>
+        /// プレフィックス(ファイル出力時のフォルダ名とファイル名接頭辞に使用する)[Prefix]プロパティ
+        /// </summary>
+        public string Prefix
+        {
+            get
+            {
+                return _Prefix;
+            }
+            set
+            {
+                if (_Prefix == null || !_Prefix.Equals(value))
+                {
+                    _Prefix = value;
+                    NotifyPropertyChanged("Prefix");
+                }
+            }
+        }
+        #endregion
+
+        #region 記事を自動生成[IsOutArticle]プロパティ
+        /// <summary>
+        /// 記事を自動生成[IsOutArticle]プロパティ用変数
+        /// </summary>
+        bool _IsOutArticle = false;
+        /// <summary>
+        /// 記事を自動生成[IsOutArticle]プロパティ
+        /// </summary>
+        public bool IsOutArticle
+        {
+            get
+            {
+                return _IsOutArticle;
+            }
+            set
+            {
+                if (!_IsOutArticle.Equals(value))
+                {
+                    _IsOutArticle = value;
+                    NotifyPropertyChanged("IsOutArticle");
+                }
+            }
+        }
+        #endregion
+
+
+
         Random _Rand = new Random();
 
+        #region コマンド
         /// <summary>
         /// コマンド
         /// </summary>
@@ -495,7 +548,7 @@ namespace PromptMaker.Models
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/txt2img.py");
                 command.AppendLine($"--prompt \"{this.Prompt}\"");
-                command.AppendLine($"--plms");
+                //command.AppendLine($"--plms");
                 command.AppendLine($"--n_iter {N_iter}");
 
                 command.AppendLine(this.Width <= 0 ? "" : $"--W {this.Width}");
@@ -554,7 +607,9 @@ namespace PromptMaker.Models
                 return command.ToString().Replace("\r\n", " ");
             }
         }
+        #endregion
 
+        #region ファイルを開くダイアログ
         /// <summary>
         /// ファイルを開くダイアログ
         /// </summary>
@@ -579,5 +634,6 @@ namespace PromptMaker.Models
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
     }
 }

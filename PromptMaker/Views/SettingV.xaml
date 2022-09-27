@@ -1,16 +1,18 @@
-﻿<Window
+﻿<mah:MetroWindow
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PromptMaker.Views"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:hlp="clr-namespace:MVVMCore.Common.Helpers;assembly=MVVMCore"
+        TitleCharacterCasing="Normal"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:ViewModels="clr-namespace:PromptMaker.ViewModels" x:Class="PromptMaker.Views.SettingV"
         mc:Ignorable="d"
         Title="SettingV" Height="450" Width="850" hlp:DialogResultHelper.DialogResult="{Binding DialogResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-    <Window.DataContext>
+    <mah:MetroWindow.DataContext>
         <ViewModels:SettingVM/>
-    </Window.DataContext>
+    </mah:MetroWindow.DataContext>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
             <b:CallMethodAction TargetObject="{Binding}" MethodName="Init"/>
@@ -75,4 +77,4 @@
             </Button>
         </Grid>
     </Grid>
-</Window>
+</mah:MetroWindow>
