@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
+using System.Xml.Serialization;
+using System.Windows.Shapes;
 
 namespace PromptMaker.Models
 {
@@ -139,11 +141,12 @@ namespace PromptMaker.Models
         }
         #endregion
 
-        public System.Windows.Controls.Border ImageArea { get; set; } = new System.Windows.Controls.Border();
+        [XmlIgnore]
+        System.Windows.Controls.Border _ImageArea = new System.Windows.Controls.Border();
 
         public void Init(System.Windows.Controls.Border border)
         {
-            this.ImageArea = border;
+            _ImageArea = border;
         }
 
         #region イメージファイルを開く
@@ -210,33 +213,66 @@ namespace PromptMaker.Models
         {
             try
             {
-                var wnd = VisualTreeHelperWrapper.GetWindow<CardV>(sender) as CardV;
+                Microsoft.Win32.SaveFileDialog dlgSave = new Microsoft.Win32.SaveFileDialog();
 
-                if (wnd != null)
+                dlgSave.Filter = "PNGファイル(*.png)|*.png";
+                dlgSave.AddExtension = true;
+
+                if ((bool)dlgSave.ShowDialog()!)
                 {
-                    Microsoft.Win32.SaveFileDialog dlgSave = new Microsoft.Win32.SaveFileDialog();
+                    // レンダリング
+                    var bmp = new RenderTargetBitmap(
+                        (int)(_ImageArea.ActualWidth),
+                        (int)(_ImageArea.ActualHeight),
+                        96, 96, // DPI
+                        PixelFormats.Pbgra32);
+                    bmp.Render(_ImageArea);
 
-                    dlgSave.Filter = "PNGファイル(*.png)|*.png";
-                    dlgSave.AddExtension = true;
-
-                    if ((bool)dlgSave.ShowDialog()!)
+                    // jpegで保存
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bmp));
+                    using (var fs = File.Open(dlgSave.FileName, FileMode.Create))
                     {
-                        // レンダリング
-                        var bmp = new RenderTargetBitmap(
-                            (int)(this.ImageArea.ActualWidth),
-                            (int)(this.ImageArea.ActualHeight),
-                            96, 96, // DPI
-                            PixelFormats.Pbgra32);
-                        bmp.Render(this.ImageArea);
-
-                        // jpegで保存
-                        var encoder = new PngBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(bmp));
-                        using (var fs = File.Open(dlgSave.FileName, FileMode.Create))
-                        {
-                            encoder.Save(fs);
-                        }
+                        encoder.Save(fs);
                     }
+
+
+                    var tmp = this.ShallowCopy<CardDataM>();
+
+                    var fileName = System.IO.Path.GetFileNameWithoutExtension(dlgSave.FileName);
+                    string dirName = System.IO.Path.GetDirectoryName(dlgSave.FileName)!;
+
+
+                    XMLUtil.Seialize(System.IO.Path.Combine(dirName, fileName + ".cardxml"), tmp);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region ロード処理
+        /// <summary>
+        /// ロード処理
+        /// </summary>
+        public void Load()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new OpenFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "カードファイル (*.cardxml)|*.cardxml";
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    var tmp = XMLUtil.Deserialize<CardDataM>(dialog.FileName);
+
+                    Clone<CardDataM>(tmp, this);
                 }
             }
             catch (Exception ex)

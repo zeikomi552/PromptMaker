@@ -140,24 +140,31 @@
                     </Border>
                 </Canvas>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="ファイル">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="画像">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenImageFile"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="背景" Cursor="Hand">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenBackgroundImageFile"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="保存">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="保存">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="Save"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
+                    <Button HorizontalAlignment="Left" Margin="5" Content="読込">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="Load"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
@@ -214,28 +221,34 @@
                     </Border>
                 </Canvas>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="ファイル">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="画像">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="OpenImageFile"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="背景" Cursor="Hand">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="OpenBackgroundImageFile"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="保存">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="保存">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="Save"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-
+                    <Button HorizontalAlignment="Left" Margin="5" Content="読込">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="Load"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
                 </StackPanel>
             </Grid>
             <Grid Grid.Column="2">
@@ -289,28 +302,34 @@
                     </Border>
                 </Canvas>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="ファイル">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="画像">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="OpenImageFile"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="背景" Cursor="Hand">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="OpenBackgroundImageFile"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="保存">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="保存">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="Save"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-
+                    <Button HorizontalAlignment="Left" Margin="5" Content="読込">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="Load"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Grid>
