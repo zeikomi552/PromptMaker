@@ -11,7 +11,7 @@
         xmlns:ViewModels="clr-namespace:PromptMaker.ViewModels" x:Class="PromptMaker.Views.CardV"
         mc:Ignorable="d"
         xmlns:Converters="clr-namespace:PromptMaker.Common.Converters"
-        Title="CardV" Height="600" Width="800" hlp:DialogResultHelper.DialogResult="{Binding DialogResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        Title="CardV" Height="1200" Width="1600" hlp:DialogResultHelper.DialogResult="{Binding DialogResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
     <mah:MetroWindow.DataContext>
         <ViewModels:CardVM/>
     </mah:MetroWindow.DataContext>
@@ -25,7 +25,7 @@
     </b:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -40,6 +40,163 @@
                     <RowDefinition Height="50*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal">
+                    
+                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="保存">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding}" MethodName="Save"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
+                </StackPanel>
+                <StackPanel Grid.Row="1">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock TextAlignment="Right" Width="90" Margin="5" Text="タイトル"/>
+                        <TextBlock Margin="5" Text=":"/>
+                        <TextBox Width="200" Margin="5" Text="{Binding CardData1.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock TextAlignment="Right" Width="90" Margin="5" Text="名前"/>
+                        <TextBlock Margin="5" Text=":"/>
+                        <TextBox Width="200" Margin="5" Text="{Binding CardData1.TypeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock TextAlignment="Right" Width="90" Margin="5" Text="説明"/>
+                        <TextBlock Margin="5" Text=":"/>
+                        <TextBox Width="200" Height="100" Margin="5" Text="{Binding CardData1.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <Grid Margin="5" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Canvas Margin="5,5,5,5" x:Name="drawcanvas" Width="320" Height="450">
+                    <Border x:Name="card_border" BorderThickness="5" CornerRadius="15" Background="#1c1c1c" Width="{Binding ActualWidth, ElementName=drawcanvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=drawcanvas, Mode=OneWay}">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#1c1c1c"/>
+                                <GradientStop Color="#c0c0c0" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+
+                        <Grid>
+                            <Image Margin="5" Source="{Binding CardData1.BackgroundImage, Converter={StaticResource StringToImageSourceConverter}}" Stretch="Fill"/>
+                            <Border Margin="5">
+                                <Border.Background>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="White" Offset="0"/>
+                                        <GradientStop Color="#7FFFFFFF" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                            </Border>
+                            <Grid Margin="15">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="0.3*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock  Margin="10,5,5,5" Text="{Binding CardData1.Title}" FontFamily="HGSMinchoE" FontSize="16"/>
+                                <Border MinHeight="100" Margin="12,0,12,0" BorderBrush="#FFc0c0c0" BorderThickness="2" Grid.Row="1">
+                                    <Image Margin="-1" Source="{Binding CardData1.ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                </Border>
+                                <TextBlock Grid.Row="2" Margin="10,5,5,5" Text="{Binding CardData1.TypeName}" FontFamily="HGSMinchoE" FontSize="16"/>
+                                <Border Margin="12,0,12,0" Grid.Row="3" BorderBrush="#FFc0c0c0" BorderThickness="2" Background="#2FDAD6D6">
+                                    <TextBlock VerticalAlignment="Center" Margin="5" Text="{Binding CardData1.Description}" TextWrapping="Wrap"/>
+                                </Border>
+                                <Grid Grid.Row="4">
+                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0" Text="Happy Programmer Games" Foreground="Black" Grid.ColumnSpan="2" FontFamily="Segoe Script" FontSize="14"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Canvas>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
+                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="ファイル">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenImageFile"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
+                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="背景" Cursor="Hand">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenBackgroundImageFile"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Canvas Margin="5" x:Name="drawcanvas2" Width="320" Height="450" Grid.Column="1">
+                    <Border x:Name="card_border2" BorderThickness="5" CornerRadius="15" Background="#1c1c1c" Width="{Binding ActualWidth, ElementName=drawcanvas2, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=drawcanvas2, Mode=OneWay}">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#1c1c1c"/>
+                                <GradientStop Color="#c0c0c0" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+
+                        <Grid>
+                            <Image Margin="5" Source="{Binding BackgroundImage, Converter={StaticResource StringToImageSourceConverter}}" Stretch="Fill"/>
+                            <Border Margin="5">
+                                <Border.Background>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="White" Offset="0"/>
+                                        <GradientStop Color="#7FFFFFFF" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                            </Border>
+                            <Grid Margin="15">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="0.3*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock  Margin="10,5,5,5" Text="{Binding Title}" FontFamily="HGSMinchoE" FontSize="16"/>
+                                <Border MinHeight="100" Margin="12,0,12,0" BorderBrush="#FFc0c0c0" BorderThickness="2" Grid.Row="1">
+                                    <Image Margin="-1" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                </Border>
+                                <TextBlock Grid.Row="2" Margin="10,5,5,5" Text="{Binding Name}" FontFamily="HGSMinchoE" FontSize="16"/>
+                                <Border Margin="12,0,12,0" Grid.Row="3" BorderBrush="#FFc0c0c0" BorderThickness="2" Background="#2FDAD6D6">
+                                    <TextBlock VerticalAlignment="Center" Margin="5" Text="{Binding Description}" TextWrapping="Wrap"/>
+                                </Border>
+                                <Grid Grid.Row="4">
+
+                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0" Text="Happy Programmer Games" Foreground="Black" Grid.ColumnSpan="2" FontFamily="Segoe Script" FontSize="14"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Canvas>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
                     <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="ファイル">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
@@ -54,90 +211,74 @@
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="保存">
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Canvas Margin="5" x:Name="drawcanvas3" Width="320" Height="450" Grid.Column="1">
+                    <Border x:Name="card_border3" BorderThickness="5" CornerRadius="15" Background="#1c1c1c" Width="{Binding ActualWidth, ElementName=drawcanvas3, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=drawcanvas2, Mode=OneWay}">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#1c1c1c"/>
+                                <GradientStop Color="#c0c0c0" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+
+                        <Grid>
+                            <Image Margin="5" Source="{Binding BackgroundImage, Converter={StaticResource StringToImageSourceConverter}}" Stretch="Fill"/>
+                            <Border Margin="5">
+                                <Border.Background>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="White" Offset="0"/>
+                                        <GradientStop Color="#7FFFFFFF" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                            </Border>
+                            <Grid Margin="15">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="0.3*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock  Margin="10,5,5,5" Text="{Binding Title}" FontFamily="HGSMinchoE" FontSize="16"/>
+                                <Border MinHeight="100" Margin="12,0,12,0" BorderBrush="#FFc0c0c0" BorderThickness="2" Grid.Row="1">
+                                    <Image Margin="-1" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                </Border>
+                                <TextBlock Grid.Row="2" Margin="10,5,5,5" Text="{Binding Name}" FontFamily="HGSMinchoE" FontSize="16"/>
+                                <Border Margin="12,0,12,0" Grid.Row="3" BorderBrush="#FFc0c0c0" BorderThickness="2" Background="#2FDAD6D6">
+                                    <TextBlock VerticalAlignment="Center" Margin="5" Text="{Binding Description}" TextWrapping="Wrap"/>
+                                </Border>
+                                <Grid Grid.Row="4">
+
+                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0" Text="Happy Programmer Games" Foreground="Black" Grid.ColumnSpan="2" FontFamily="Segoe Script" FontSize="14"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Canvas>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
+                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="ファイル">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding}" MethodName="Save"/>
+                                <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenImageFile"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
+                    <Button HorizontalAlignment="Left" Width="100" Margin="5" Content="背景" Cursor="Hand">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenBackgroundImageFile"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
                 </StackPanel>
-                <StackPanel Grid.Row="1">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock TextAlignment="Right" Width="90" Margin="5" Text="タイトル"/>
-                        <TextBlock Margin="5" Text=":"/>
-                        <TextBox Width="200" Margin="5" Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock TextAlignment="Right" Width="90" Margin="5" Text="名前"/>
-                        <TextBlock Margin="5" Text=":"/>
-                        <TextBox Width="200" Margin="5" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock TextAlignment="Right" Width="90" Margin="5" Text="説明"/>
-                        <TextBlock Margin="5" Text=":"/>
-                        <TextBox Width="200" Height="100" Margin="5" Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"/>
-                    </StackPanel>
-                </StackPanel>
             </Grid>
-        </GroupBox>
-
-        <Grid Margin="5" Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Canvas x:Name="drowcanvas" Width="320" Height="450" Grid.Row="1" Grid.Column="1">
-                <Border x:Name="card_border" BorderThickness="5" CornerRadius="15" Background="#1c1c1c" Width="{Binding ActualWidth, ElementName=drowcanvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=drowcanvas, Mode=OneWay}">
-                    <Border.BorderBrush>
-                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                            <GradientStop Color="#1c1c1c"/>
-                            <GradientStop Color="#c0c0c0" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.BorderBrush>
-
-                    <Grid>
-                        <Image Margin="5" Source="{Binding BackgroundImage, Converter={StaticResource StringToImageSourceConverter}}" Stretch="Fill"/>
-                        <Border Margin="5">
-                            <Border.Background>
-                                <RadialGradientBrush>
-                                    <GradientStop Color="White" Offset="0"/>
-                                    <GradientStop Color="#7FFFFFFF" Offset="1"/>
-                                </RadialGradientBrush>
-                            </Border.Background>
-                        </Border>
-                        <Grid Margin="15">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="0.3*"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock  Margin="10,5,5,5" Text="{Binding Title}" FontFamily="HGSMinchoE" FontSize="16"/>
-                            <Border MinHeight="100" Margin="12,0,12,0" BorderBrush="#FFc0c0c0" BorderThickness="2" Grid.Row="1">
-                                <Image Margin="-1" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
-                            </Border>
-                            <TextBlock Grid.Row="2" Margin="10,5,5,5" Text="{Binding Name}" FontFamily="HGSMinchoE" FontSize="16"/>
-                            <Border Margin="12,0,12,0" Grid.Row="3" BorderBrush="#FFc0c0c0" BorderThickness="2" Background="#2FDAD6D6">
-                                <TextBlock VerticalAlignment="Center" Margin="5" Text="{Binding Description}" TextWrapping="Wrap"/>
-                            </Border>
-                            <Grid Grid.Row="4">
-
-                                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0" Text="Happy Programmer Games" Foreground="Black" Grid.ColumnSpan="2" FontFamily="Segoe Script" FontSize="14"/>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
-            </Canvas>
         </Grid>
     </Grid>
 </mah:MetroWindow>
