@@ -139,6 +139,13 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        public System.Windows.Controls.Border ImageArea { get; set; } = new System.Windows.Controls.Border();
+
+        public void Init(System.Windows.Controls.Border border)
+        {
+            this.ImageArea = border;
+        }
+
         #region イメージファイルを開く
         /// <summary>
         /// イメージファイルを開く
@@ -166,6 +173,10 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region 背景ファイルを開く処理
+        /// <summary>
+        /// 背景ファイルを開く処理
+        /// </summary>
         public void OpenBackgroundImageFile()
         {
             try
@@ -187,6 +198,7 @@ namespace PromptMaker.Models
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
         #region 保存ボタン処理(.png)
         /// <summary>
@@ -196,33 +208,40 @@ namespace PromptMaker.Models
         /// <param name="e"></param>
         public void Save(object sender, RoutedEventArgs e)
         {
-            var wnd = VisualTreeHelperWrapper.GetWindow<CardV>(sender) as CardV;
-
-            if (wnd != null)
+            try
             {
-                Microsoft.Win32.SaveFileDialog dlgSave = new Microsoft.Win32.SaveFileDialog();
+                var wnd = VisualTreeHelperWrapper.GetWindow<CardV>(sender) as CardV;
 
-                dlgSave.Filter = "PNGファイル(*.png)|*.png";
-                dlgSave.AddExtension = true;
-
-                if ((bool)dlgSave.ShowDialog()!)
+                if (wnd != null)
                 {
-                    // レンダリング
-                    var bmp = new RenderTargetBitmap(
-                        (int)(wnd.card_border.ActualWidth),
-                        (int)(wnd.card_border.ActualHeight),
-                        96, 96, // DPI
-                        PixelFormats.Pbgra32);
-                    bmp.Render(wnd.card_border);
+                    Microsoft.Win32.SaveFileDialog dlgSave = new Microsoft.Win32.SaveFileDialog();
 
-                    // jpegで保存
-                    var encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(bmp));
-                    using (var fs = File.Open(dlgSave.FileName, FileMode.Create))
+                    dlgSave.Filter = "PNGファイル(*.png)|*.png";
+                    dlgSave.AddExtension = true;
+
+                    if ((bool)dlgSave.ShowDialog()!)
                     {
-                        encoder.Save(fs);
+                        // レンダリング
+                        var bmp = new RenderTargetBitmap(
+                            (int)(this.ImageArea.ActualWidth),
+                            (int)(this.ImageArea.ActualHeight),
+                            96, 96, // DPI
+                            PixelFormats.Pbgra32);
+                        bmp.Render(this.ImageArea);
+
+                        // jpegで保存
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(bmp));
+                        using (var fs = File.Open(dlgSave.FileName, FileMode.Create))
+                        {
+                            encoder.Save(fs);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
         #endregion
