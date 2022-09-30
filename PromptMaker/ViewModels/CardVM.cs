@@ -40,6 +40,33 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region 背景画像[BackgroundImage]プロパティ
+        /// <summary>
+        /// 背景画像[BackgroundImage]プロパティ用変数
+        /// </summary>
+        string _BackgroundImage = string.Empty;
+        /// <summary>
+        /// 背景画像[BackgroundImage]プロパティ
+        /// </summary>
+        public string BackgroundImage
+        {
+            get
+            {
+                return _BackgroundImage;
+            }
+            set
+            {
+                if (_BackgroundImage == null || !_BackgroundImage.Equals(value))
+                {
+                    _BackgroundImage = value;
+                    NotifyPropertyChanged("BackgroundImage");
+                }
+            }
+        }
+        #endregion
+
+
+
         #region タイトル[Title]プロパティ
         /// <summary>
         /// タイトル[Title]プロパティ用変数
@@ -137,8 +164,8 @@ namespace PromptMaker.ViewModels
                 {
                     // レンダリング
                     var bmp = new RenderTargetBitmap(
-                        (int)(wnd.card_border.ActualWidth*1.5),
-                        (int)(wnd.card_border.ActualHeight*1.5),
+                        (int)(wnd.card_border.ActualWidth),
+                        (int)(wnd.card_border.ActualHeight),
                         96, 96, // DPI
                         PixelFormats.Pbgra32);
                     bmp.Render(wnd.card_border);
@@ -178,7 +205,7 @@ namespace PromptMaker.ViewModels
                 // ダイアログを表示する
                 if (dialog.ShowDialog() == true)
                 {
-                    this.ImagePath = dialog.FileName;
+                    this.BackgroundImage = this.ImagePath = dialog.FileName;
                 }
             }
             catch (Exception ex)
@@ -187,6 +214,28 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
+
+        public void OpenBackgroundImageFile()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new OpenFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "画像ファイル (*.png)|*.png";
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    this.BackgroundImage = dialog.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
 
         public override void Close(object sender, EventArgs e)
         {
