@@ -93,10 +93,11 @@
 
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <Canvas Margin="5,5,5,5" x:Name="drawcanvas" Width="320" Height="450">
+                <Canvas Grid.Row="1" Margin="5,5,5,5" x:Name="drawcanvas" Width="320" Height="450">
                     <Border x:Name="card_border" BorderThickness="5" CornerRadius="15" Background="#1c1c1c" Width="{Binding ActualWidth, ElementName=drawcanvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=drawcanvas, Mode=OneWay}">
                         <Border.BorderBrush>
                             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -136,32 +137,60 @@
                                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,0" Text="Happy Programmer Games" Foreground="Black" Grid.ColumnSpan="2" FontFamily="Segoe Script" FontSize="14"/>
                                 </Grid>
                             </Grid>
+                            <Image Margin="5" Source="{Binding CardData1.HologramPath, Converter={StaticResource StringToImageSourceConverter}}" Stretch="Fill" Opacity="{Binding CardData1.Opacity}"/>
+
                         </Grid>
                     </Border>
                 </Canvas>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
-                    <Button HorizontalAlignment="Left" Margin="5" Content="画像">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenImageFile"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenBackgroundImageFile"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="保存">
+                <StackPanel>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <Button HorizontalAlignment="Left" Margin="5" Content="画像">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenBackgroundImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="ホロ" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="OpenHologramImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="透明度:"/>
+                            <TextBox Width="100" Text="{Binding CardData1.Opacity}" TextAlignment="Center"/>
+                            <Slider Width="100" Value="{Binding CardData1.Opacity}" Minimum="0" Maximum="1" IsSnapToTickEnabled="True" SmallChange="0.01" LargeChange="0.01" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="2">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="画像保存" Cursor="Hand">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="Save"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="読込">
+                    <Button HorizontalAlignment="Left" Margin="5" Content="カード保存" Cursor="Hand">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="SaveCard"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </Button>
+                    <Button HorizontalAlignment="Left" Margin="5" Content="カード読込" Cursor="Hand">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Click">
                                 <b:CallMethodAction TargetObject="{Binding CardData1}" MethodName="Load"/>
@@ -220,35 +249,51 @@
                         </Grid>
                     </Border>
                 </Canvas>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
-                    <Button HorizontalAlignment="Left" Margin="5" Content="画像">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="OpenImageFile"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="OpenBackgroundImageFile"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="保存">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="Save"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="読込">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="Load"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
+                <StackPanel Grid.Row="1">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <Button HorizontalAlignment="Left" Margin="5" Content="画像">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="OpenImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="OpenBackgroundImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="ホロ" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="OpenHologramImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="保存">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="Save"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="読込">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData2}" MethodName="Load"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="透明度:"/>
+                            <TextBox Width="100" Text="{Binding CardData2.Opacity}" TextAlignment="Center"/>
+                            <Slider Width="100" Value="{Binding CardData2.Opacity}" Minimum="0" Maximum="1" IsSnapToTickEnabled="True" SmallChange="0.01" LargeChange="0.01" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
             <Grid Grid.Column="2">
@@ -301,35 +346,51 @@
                         </Grid>
                     </Border>
                 </Canvas>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
-                    <Button HorizontalAlignment="Left" Margin="5" Content="画像">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="OpenImageFile"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="OpenBackgroundImageFile"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="保存">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="Save"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
-                    <Button HorizontalAlignment="Left" Margin="5" Content="読込">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="Click">
-                                <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="Load"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </Button>
+                <StackPanel Grid.Row="1">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <Button HorizontalAlignment="Left" Margin="5" Content="画像">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="OpenImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="背景" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="OpenBackgroundImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="ホロ" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="OpenHologramImageFile"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="保存">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="Save"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button HorizontalAlignment="Left" Margin="5" Content="読込">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding CardData3}" MethodName="Load"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="透明度:"/>
+                            <TextBox Width="100" Text="{Binding CardData3.Opacity}" TextAlignment="Center"/>
+                            <Slider Width="100" Value="{Binding CardData3.Opacity}" Minimum="0" Maximum="1" IsSnapToTickEnabled="True" SmallChange="0.01" LargeChange="0.01" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Grid>
