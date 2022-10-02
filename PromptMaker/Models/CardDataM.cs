@@ -123,7 +123,7 @@ namespace PromptMaker.Models
         /// <summary>
         /// タイプ名[TypeName]プロパティ用変数
         /// </summary>
-        string _TypeName = string.Empty;
+        string _TypeName = "属性";
         /// <summary>
         /// タイプ名[TypeName]プロパティ
         /// </summary>
@@ -139,6 +139,31 @@ namespace PromptMaker.Models
                 {
                     _TypeName = value;
                     NotifyPropertyChanged("TypeName");
+                }
+            }
+        }
+        #endregion
+
+        #region フッター[Footer]プロパティ
+        /// <summary>
+        /// フッター[Footer]プロパティ用変数
+        /// </summary>
+        string _Footer = "Happy Programmer Games";
+        /// <summary>
+        /// フッター[Footer]プロパティ
+        /// </summary>
+        public string Footer
+        {
+            get
+            {
+                return _Footer;
+            }
+            set
+            {
+                if (_Footer == null || !_Footer.Equals(value))
+                {
+                    _Footer = value;
+                    NotifyPropertyChanged("Footer");
                 }
             }
         }
@@ -173,11 +198,11 @@ namespace PromptMaker.Models
         /// <summary>
         /// 透明度[Opacity]プロパティ用変数
         /// </summary>
-        double _Opacity = 0.3;
+        decimal _Opacity = (decimal)0.3;
         /// <summary>
         /// 透明度[Opacity]プロパティ
         /// </summary>
-        public double Opacity
+        public decimal Opacity
         {
             get
             {
