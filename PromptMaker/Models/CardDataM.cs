@@ -219,10 +219,13 @@ namespace PromptMaker.Models
         }
         #endregion
 
-
-
         [XmlIgnore]
         System.Windows.Controls.Border _ImageArea = new System.Windows.Controls.Border();
+
+        /// <summary>
+        /// カードファイルパス
+        /// </summary>
+        private string _CardFilePath = string.Empty;
 
         #region 初期化処理
         /// <summary>
@@ -288,7 +291,6 @@ namespace PromptMaker.Models
             }
         }
         #endregion
-
 
         #region ホログラムファイルを開く処理
         /// <summary>
@@ -418,7 +420,6 @@ namespace PromptMaker.Models
         }
         #endregion
 
-
         #region プロジェクトファイルの作成処理
         /// <summary>
         /// プロジェクトファイルの作成処理
@@ -448,8 +449,7 @@ namespace PromptMaker.Models
         }
         #endregion
 
-
-
+        #region 画像ファイルの移動処理
         /// <summary>
         /// 画像ファイルの移動処理
         /// </summary>
@@ -466,20 +466,31 @@ namespace PromptMaker.Models
 
                 tempDir = Path.Combine(tempDir, "PromptMaker-" + guid.ToString());
 
-                // ディレクトリが無ければ作成する
-                PathManager.CreateDirectory(tempDir);
+                if (!string.IsNullOrEmpty(this._CardFilePath))
+                {
+                    // zipファイル解凍
+                    ZipFile.ExtractToDirectory(this._CardFilePath, tempDir);
+                }
+                else
+                {
+                    // ディレクトリが無ければ作成する
+                    PathManager.CreateDirectory(tempDir);
+                }
 
                 // イメージ保存先
                 string img_dir = Path.Combine(tempDir, "Images");
 
-                // イメージファイルの移動
-                MoveData(img_dir, this.ImagePath);
+                if (File.Exists(this.ImagePath))
+                    // イメージファイルの移動
+                    MoveData(img_dir, this.ImagePath);
 
-                // ホログラムファイルの移動
-                MoveData(img_dir, this.HologramPath);
+                if (File.Exists(this.HologramPath))
+                    // ホログラムファイルの移動
+                    MoveData(img_dir, this.HologramPath);
 
-                // ホログラムファイルの移動
-                MoveData(img_dir, this.BackgroundImage);
+                if (File.Exists(this.BackgroundImage))
+                    // ホログラムファイルの移動
+                    MoveData(img_dir, this.BackgroundImage);
 
                 // 構造XMLファイル名の作成
                 string proj_file_path = System.IO.Path.Combine(tempDir, "content.xml");
@@ -515,7 +526,9 @@ namespace PromptMaker.Models
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
+        #region ファイルの移動処理
         /// <summary>
         /// ファイルの移動処理
         /// </summary>
@@ -547,6 +560,7 @@ namespace PromptMaker.Models
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
         #region カードファイルのロード処理
         /// <summary>
@@ -572,17 +586,24 @@ namespace PromptMaker.Models
 
                 var tmp = XMLUtil.Deserialize<CardDataM>(contentxml);
 
-                tmp.BackgroundImage = Path.Combine(tempDir, tmp.BackgroundImage);
-                tmp.HologramPath = Path.Combine(tempDir, tmp.HologramPath);
-                tmp.ImagePath = Path.Combine(tempDir, tmp.ImagePath);
+                tmp.BackgroundImage = Path.Combine(tempDir, tmp.BackgroundImage);       // 背景画像
+                tmp.HologramPath = Path.Combine(tempDir, tmp.HologramPath);             // ホログラム画像
+                tmp.ImagePath = Path.Combine(tempDir, tmp.ImagePath);                   // イメージ画像
                 Clone<CardDataM>(tmp, this);
 
+                var dirname = "Images";
+                this._ImagePath = Path.Combine(dirname, System.IO.Path.GetFileName(this.ImagePath));              // Imageファイルパスの修正
+                this._BackgroundImage = Path.Combine(dirname, System.IO.Path.GetFileName(this.BackgroundImage));  // 背景画像パスの修正
+                this._HologramPath = Path.Combine(dirname, System.IO.Path.GetFileName(this.HologramPath));        // ホログラムファイルパスの修正
 
                 // DirectoryInfoのインスタンスを生成する
                 DirectoryInfo di = new DirectoryInfo(tempDir);
 
                 // 元のディレクトリを削除する
                 di.Delete(true);
+
+                // 処理が最後まで行ったので保存
+                this._CardFilePath = file_path;
             }
             catch (Exception ex)
             {
