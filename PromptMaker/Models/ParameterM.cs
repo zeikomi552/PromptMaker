@@ -506,6 +506,30 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region PLMSを使用する[UsePlms]プロパティ
+        /// <summary>
+        /// PLMSを使用する[UsePlms]プロパティ用変数
+        /// </summary>
+        bool _UsePlms = true;
+        /// <summary>
+        /// PLMSを使用する[UsePlms]プロパティ
+        /// </summary>
+        public bool UsePlms
+        {
+            get
+            {
+                return _UsePlms;
+            }
+            set
+            {
+                if (!_UsePlms.Equals(value))
+                {
+                    _UsePlms = value;
+                    NotifyPropertyChanged("UsePlms");
+                }
+            }
+        }
+        #endregion
 
 
         Random _Rand = new Random();
@@ -548,13 +572,13 @@ namespace PromptMaker.Models
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/txt2img.py");
                 command.AppendLine($"--prompt \"{this.Prompt}\"");
-                //command.AppendLine($"--plms");
                 command.AppendLine($"--n_iter {N_iter}");
-
                 command.AppendLine(this.Width <= 0 ? "" : $"--W {this.Width}");
                 command.AppendLine(this.Height <= 0 ? "" : $"--H {this.Height}");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
+                command.AppendLine(this.UsePlms ? "--plms" : "");
+                command.AppendLine(!string.IsNullOrWhiteSpace(this.Outdir) ? $"--outdir {this.Outdir}" : "");
 
                 return command.ToString().Replace("\r\n", " ");
             }

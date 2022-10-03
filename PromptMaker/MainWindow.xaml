@@ -12,7 +12,7 @@
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:ViewModels="clr-namespace:PromptMaker.ViewModels" x:Class="PromptMaker.MainWindow"
         xmlns:Converters="clr-namespace:PromptMaker.Common.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="1024">
+        Title="MainWindow" Height="1200" Width="1024">
     <mah:MetroWindow.Resources>
         <Converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
         <Converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -238,7 +238,7 @@
                                 <Image Margin="5,5,5,5" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
                                 <ListView ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="1"
                                           ItemsSource="{Binding ImagePathList.Items}" 
-                                          SelectedItem="{Binding ImagePathList.SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                          SelectedItem="{Binding ImagePathList}">
                                     <b:Interaction.Triggers>
                                         <b:EventTrigger EventName="SelectionChanged">
                                             <b:CallMethodAction TargetObject="{Binding}" MethodName="ImagePathSelectionChanged"/>
@@ -352,10 +352,23 @@
                                             Minimum="1" Maximum="20" Width="100" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="1" TickFrequency="1"/>
                                         <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.N_iter}" VerticalAlignment="Center" Margin="5"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock ToolTip="use plms sampling"
+                                                   TextAlignment="Right" Width="90" Text="plms" VerticalAlignment="Center" Margin="5"/>
+                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.UsePlms}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock ToolTip="出力先ディレクトリ"
+                                                   TextAlignment="Right" Width="90" Text="出力先" VerticalAlignment="Center" Margin="5"/>
+                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                        <TextBox Width="150" Text="{Binding Parameter.Outdir}"/>
+                                    </StackPanel>
+
 
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock ToolTip="ファイル出力時にフォルダ名とファイル名接頭辞に使用する"
-                                                   TextAlignment="Right" Width="80" Text="ブログファイル作成" VerticalAlignment="Center" Margin="5"/>
+                                                   TextAlignment="Right" Width="90" Text="ブログファイル作成" VerticalAlignment="Center" Margin="5"/>
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.IsOutArticle}"/>
                                     </StackPanel>
@@ -365,7 +378,6 @@
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <TextBox Width="150" Text="{Binding Parameter.Prefix}"/>
                                     </StackPanel>
-
                                 </StackPanel>
                             </Grid>
 
