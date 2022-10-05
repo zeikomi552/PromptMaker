@@ -14,6 +14,31 @@ namespace PromptMaker.Models
 {
     public class ParameterM : ModelBase
     {
+        #region 繰り返し回数[Repeat]プロパティ
+        /// <summary>
+        /// 繰り返し回数[Repeat]プロパティ用変数
+        /// </summary>
+        int _Repeat = 1;
+        /// <summary>
+        /// 繰り返し回数[Repeat]プロパティ
+        /// </summary>
+        public int Repeat
+        {
+            get
+            {
+                return _Repeat;
+            }
+            set
+            {
+                if (!_Repeat.Equals(value))
+                {
+                    _Repeat = value;
+                    NotifyPropertyChanged("Repeat");
+                }
+            }
+        }
+        #endregion
+
         #region 設定ファイルオブジェクト[SettingConf]プロパティ
         /// <summary>
         /// 設定ファイルオブジェクト[SettingConf]プロパティ用変数

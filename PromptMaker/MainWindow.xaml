@@ -64,6 +64,8 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="タイプ:"/>
                         <ComboBox Margin="5" Width="100" ItemsSource="{Binding ScriptTypeEnumEx}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding Parameter.ScriptType}" Grid.Column="0"/>
+                        <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="繰り返し:"/>
+                        <TextBox TextAlignment="Center" Margin="5" Width="100" Text="{Binding Parameter.Repeat}" Grid.Column="0"/>
                     </StackPanel>
 
                     <Grid>
@@ -238,7 +240,7 @@
                                 <Image Margin="5,5,5,5" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
                                 <ListView ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="1"
                                           ItemsSource="{Binding ImagePathList.Items}" 
-                                          SelectedItem="{Binding ImagePathList}">
+                                          SelectedItem="{Binding ImagePathList.SelectedItem}">
                                     <b:Interaction.Triggers>
                                         <b:EventTrigger EventName="SelectionChanged">
                                             <b:CallMethodAction TargetObject="{Binding}" MethodName="ImagePathSelectionChanged"/>

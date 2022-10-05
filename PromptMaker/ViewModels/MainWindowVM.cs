@@ -304,6 +304,7 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region カード編集画面を開く
         /// <summary>
         /// カード編集画面を開く
         /// </summary>
@@ -324,6 +325,7 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
         #region フォルダを開く処理
         /// <summary>
@@ -499,45 +501,43 @@ namespace PromptMaker.ViewModels
 
                 StringBuilder article = new StringBuilder();
 
-                // プロンプト補助リスト
-                foreach (var composer in this.PromptComposerConf.Item.Items)
+                // 繰り返し回数指定
+                for (int cnt = 0; cnt < this.Parameter.Repeat; cnt++)
                 {
-                    // 有効なもののみ実行
-                    if (composer.IsEnable)
+                    // プロンプト補助リスト
+                    foreach (var composer in this.PromptComposerConf.Item.Items)
                     {
-                        article.AppendLine($"## {composer.Description}({composer.Prompt})");
-                        foreach (var prompt in prompt_list)
+                        // 有効なもののみ実行
+                        if (composer.IsEnable)
                         {
-                            // 空の改行の場合は次の行へ
-                            if (string.IsNullOrWhiteSpace(prompt))
+                            article.AppendLine($"## {composer.Description}({composer.Prompt})");
+                            foreach (var prompt in prompt_list)
                             {
-                                continue;
-                            }
-
-                            article.AppendLine($"### {prompt}");
-                            article.AppendLine($"");
-
-                            this.Parameter.Prompt = prompt + " " + composer.Prompt; // プロンプトの作成
-                            string command = this.Parameter.Command;                // コマンドの保持
-
-                            // 記事作成の場合
-                            if (this.Parameter.IsOutArticle)
-                            {
-                                ExecuteSub(sender, ev, true, $"Prompt -> {this.Parameter.Prompt}\r\n{command}", this.Parameter.Prefix);
-
-                                // ディレクトリ直下のすべてのファイル一覧を取得する
-                                FileInfo[] fiAlls = di.GetFiles();
-                                var file = fiAlls.Last();
-                                article.AppendLine($"Prompt:{this.Parameter.Prompt}");
-                                article.AppendLine($"```");
-                                article.AppendLine($"{command}");
-                                article.AppendLine($"```");
+                                article.AppendLine($"### {prompt}");
                                 article.AppendLine($"");
-                                article.AppendLine($"[![]({this.Parameter.Prefix}/{file.Name})]({this.Parameter.Prefix}/{file.Name})");
-                            }
-                            else
-                            {
-                                ExecuteSub(sender, ev);
+
+                                this.Parameter.Prompt = prompt + " " + composer.Prompt; // プロンプトの作成
+                                string command = this.Parameter.Command;                // コマンドの保持
+
+                                // 記事作成の場合
+                                if (this.Parameter.IsOutArticle)
+                                {
+                                    ExecuteSub(sender, ev, true, $"Prompt -> {this.Parameter.Prompt}\r\n{command}", this.Parameter.Prefix);
+
+                                    // ディレクトリ直下のすべてのファイル一覧を取得する
+                                    FileInfo[] fiAlls = di.GetFiles();
+                                    var file = fiAlls.Last();
+                                    article.AppendLine($"Prompt:{this.Parameter.Prompt}");
+                                    article.AppendLine($"```");
+                                    article.AppendLine($"{command}");
+                                    article.AppendLine($"```");
+                                    article.AppendLine($"");
+                                    article.AppendLine($"[![]({this.Parameter.Prefix}/{file.Name})]({this.Parameter.Prefix}/{file.Name})");
+                                }
+                                else
+                                {
+                                    ExecuteSub(sender, ev);
+                                }
                             }
                         }
                     }
@@ -567,143 +567,6 @@ namespace PromptMaker.ViewModels
 
         private string _LastFilePath = string.Empty;
 
-        ////private string GetArticle()
-        ////{
-        ////    string[] prompts = new string[] {
-        ////            "日本画", "油彩画", "アクリル画", "水彩画",
-        ////            "グアッシュ", "パステル画", "ドローイング", "リトグラフ", "シルクスクリーン",
-        ////            "木版画", "銅版画", "ジクレー", "ミクストメディア",
-        ////            "ステンドグラス"
-        ////        };
-
-        ////    StringBuilder txt = new StringBuilder();
-
-        ////    foreach (var tmp in prompts)
-        ////    {
-        ////        txt.AppendLine($"## {tmp}");
-        ////        txt.AppendLine($"[{tmp} - Google画像検索](https://www.google.co.jp/search?q={tmp.Replace(" ", "+")}&tbm=isch)");
-        ////        txt.AppendLine($"[{tmp} - Wiki](https://ja.wikipedia.org/wiki/{tmp})");
-        ////    }
-
-        ////    // 記事を出力する場合
-        ////    if (this.Parameter.IsOutArticle)
-        ////    {
-        ////        // 親ディレクトリ
-        ////        var parent_dir = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-        ////        var path = Path.Combine(parent_dir, this.Parameter.Prefix);
-
-        ////        File.WriteAllText(Path.Combine(parent_dir, $"{this.Parameter.Prefix}.md"), text.ToString());
-        ////    }
-
-        ////    return txt.ToString();
-        ////}
-
-
-        //#region コマンドの実行
-        ///// <summary>
-        ///// コマンドの実行
-        ///// </summary>
-        //public void Execute2(object sender, EventArgs ev)
-        //{
-        //    try
-        //    {
-        //        //string txt = GetArticle();
-
-        //        //string[] prompts = new string[] {
-        //        //    "Katsushika Hokusai", "Giuseppe Arcimboldo", "Andy Warhol", "Gustav Klimt",
-        //        //    "Eugène Henri Paul Gauguin", "Vincent Willem van Gogh", "Raffaello Santi", "Paul Cézanne", "Leonardo da Vinci",
-        //        //    "Jacques-Louis David", "Salvador Dalí", "Francisco José de Goya y Lucientes", "Ferdinand Victor Eugène Delacroix",
-        //        //    "Pablo Ruiz Picasso", "Camille Pissarro", "Johannes Vermeer","Pieter Bruegel", "Diego Velázquez", "Édouard Manet",
-        //        //    "Jean-François Millet", "Edvard Munch", "Claude Monet", "Peter Paul Rubens", "Pierre-Auguste Renoir", "Rembrandt van Rijn"
-        //        //};
-
-        //        //string[] prompts = new string[] {
-        //        //    "japan Painting", "Oil Painting", "Acrylic Painting", "watercolor painting",
-        //        //    "Gouache", "Pastel paintings", "drawing", "lithograph", "Silkscreen",
-        //        //    "Woodcut", "Copper engravings", "Giclee", "Mixed Media", "Stained Glass"
-        //        //};
-
-        //        //foreach (var prompt in prompts)
-        //        //{
-        //        //    this.Parameter.Prompt = "cat by " + prompt;
-        //        //    ExecuteSub(sender, ev, true, $"Prompt -> {this.Parameter.Prompt}\r\n{this.Parameter.Command}");
-        //        //}
-
-        //        //for (int i = 0; i < 100; i++)
-        //        //{
-        //        //    this.Parameter.Seed = 0;
-        //        //    ExecuteSub(sender, ev, true, $"Seed -> {i}\r\n{this.Parameter.Command}");
-        //        //}
-
-        //        var prompts = new string[,] {
-        //                { "halloween", "ハロウィン" }
-        //            };
-
-        //        var prompts2 = new string[,] {
-        //                { "by Oil Painting", "油彩画" },
-        //                { "by watercolor painting", "水彩画" },
-        //                { "by japan Painting", "日本画" },
-        //                { "by Stained Glass", "ステンドグラス" },
-        //                { "by Katsushika Hokusai", "葛飾北斎" },
-        //            };
-
-        //        int iter = 3;
-        //        string keyword = "stablediffusion-09";
-
-        //        StringBuilder text = new StringBuilder();
-
-        //        // 親ディレクトリ
-        //        var parent_dir = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-        //        var path = Path.Combine(parent_dir, keyword);
-
-        //        for (int i = 0; i < prompts.GetLength(0); i ++)
-        //        {
-        //            var prompt = prompts[i, 0];
-        //            var title = prompts[i, 1];
-
-        //            text.AppendLine($"## {title}");
-
-        //            for (int j = 0; j< prompts2.GetLength(0); j++)
-        //            {
-        //                var prompt2 = prompts2[j,0];
-        //                var title2 = prompts2[j, 1];
-        //                text.AppendLine($"### {title2}");
-
-        //                for (int k = 1; k <= iter; k++)
-        //                {
-        //                    this.Parameter.Seed = k;
-        //                    this.Parameter.Prompt = prompt + " " + prompt2;
-        //                    ExecuteSub(sender, ev, true, $"Prompt -> {this.Parameter.Prompt}\r\n{this.Parameter.Command}", keyword);
-
-        //                    // DirectoryInfoのインスタンスを生成する
-        //                    DirectoryInfo di = new DirectoryInfo(path);
-
-        //                    // ディレクトリ直下のすべてのファイル一覧を取得する
-        //                    FileInfo[] fiAlls = di.GetFiles();
-        //                    var file = fiAlls.Last();
-
-        //                    if (k == 1)
-        //                    {
-        //                        text.AppendLine($"Prompt:{this.Parameter.Prompt}");
-        //                    }
-
-        //                    text.AppendLine($"```");
-        //                    text.AppendLine($"{this.Parameter.Command}");
-        //                    text.AppendLine($"```");
-        //                    text.AppendLine($"");
-        //                    text.AppendLine($"[![]({keyword}/{file.Name})]({keyword}/{file.Name})");
-        //                }
-        //            }
-        //        }
-
-        //        File.WriteAllText(Path.Combine(parent_dir, $"{keyword}.md"), text.ToString());
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ShowMessage.ShowErrorOK(ex.Message, "Error");
-        //    }
-        //}
-        //#endregion
 
         #region サブ関数
         /// <summary>
