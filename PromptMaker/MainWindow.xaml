@@ -12,7 +12,7 @@
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:ViewModels="clr-namespace:PromptMaker.ViewModels" x:Class="PromptMaker.MainWindow"
         xmlns:Converters="clr-namespace:PromptMaker.Common.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1200" Width="1024">
+        Title="MainWindow" Height="1200" Width="1400">
     <mah:MetroWindow.Resources>
         <Converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
         <Converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -364,7 +364,14 @@
                                         <TextBlock ToolTip="出力先ディレクトリ"
                                                    TextAlignment="Right" Width="90" Text="出力先" VerticalAlignment="Center" Margin="5"/>
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBox Width="150" Text="{Binding Parameter.Outdir}"/>
+                                        <TextBox VerticalAlignment="Center" Width="150" Text="{Binding Parameter.Outdir}"/>
+                                        <Button Margin="5" Content="フォルダ">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenOutDir"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
                                     </StackPanel>
 
 

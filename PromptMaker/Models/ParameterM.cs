@@ -684,5 +684,33 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        #region 出力先ディレクトリの選択
+        /// <summary>
+        /// 出力先ディレクトリの選択
+        /// </summary>
+        public void OpenOutDir()
+        {
+            try
+            {
+                var dlg = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
+
+                // フォルダ選択ダイアログ（falseにするとファイル選択ダイアログ）
+                dlg.IsFolderPicker = true;
+                // タイトル
+                dlg.Title = "フォルダを選択してください";
+
+                // 初期ディレクトリ
+                if (dlg.ShowDialog() == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
+                {
+                    this.Outdir = dlg.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
     }
 }

@@ -3,6 +3,7 @@ using MVVMCore.BaseClass;
 using MVVMCore.Common.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -95,9 +96,9 @@ namespace PromptMaker.Models
         }
         #endregion
 
-        #region 出力先フォルダの選択ダイアログ
+        #region カレントディレクトリの選択ダイアログ
         /// <summary>
-        /// 出力先フォルダの選択ダイアログ
+        /// カレントディレクトリの選択ダイアログ
         /// </summary>
         public void OpenCurrentDir()
         {
@@ -109,15 +110,8 @@ namespace PromptMaker.Models
                 dlg.IsFolderPicker = true;
                 // タイトル
                 dlg.Title = "フォルダを選択してください";
+
                 // 初期ディレクトリ
-
-                if (!string.IsNullOrEmpty(this.CurrentDir))
-                {
-                    string sDirName = System.IO.Path.GetDirectoryName(this.CurrentDir)!;
-                    dlg.InitialDirectory = dlg.FileName;
-                }
-
-
                 if (dlg.ShowDialog() == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
                 {
                     this.CurrentDir = dlg.FileName;
@@ -154,7 +148,5 @@ namespace PromptMaker.Models
             }
         }
         #endregion
-
-
     }
 }

@@ -51,9 +51,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
-
-
         #region 初期化処理
         /// <summary>
         /// 初期化処理
@@ -72,8 +69,6 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
-
-
 
         #region 保存
         /// <summary>
@@ -95,6 +90,7 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
+
         #region キャンセル
         /// <summary>
         /// キャンセル
