@@ -360,6 +360,21 @@
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.UsePlms}"/>
                                     </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock ToolTip="モデル"
+                                                   TextAlignment="Right" Width="90" Text="CKPTファイル" VerticalAlignment="Center" Margin="5"/>
+                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                        <TextBox VerticalAlignment="Center" Width="150" Text="{Binding Parameter.CkptPath}"/>
+                                        <Button Margin="5" Content="ファイル">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenCkptFile"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                    </StackPanel>
+
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock ToolTip="出力先ディレクトリ"
                                                    TextAlignment="Right" Width="90" Text="出力先" VerticalAlignment="Center" Margin="5"/>
@@ -373,7 +388,6 @@
                                             </b:Interaction.Triggers>
                                         </Button>
                                     </StackPanel>
-
 
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock ToolTip="ファイル出力時にフォルダ名とファイル名接頭辞に使用する"

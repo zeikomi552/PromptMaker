@@ -214,6 +214,31 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region モデルファイルパス[CkptPath]プロパティ
+        /// <summary>
+        /// モデルファイルパス[CkptPath]プロパティ用変数
+        /// </summary>
+        string _CkptPath = string.Empty;
+        /// <summary>
+        /// モデルファイルパス[CkptPath]プロパティ
+        /// </summary>
+        public string CkptPath
+        {
+            get
+            {
+                return _CkptPath;
+            }
+            set
+            {
+                if (_CkptPath == null || !_CkptPath.Equals(value))
+                {
+                    _CkptPath = value;
+                    NotifyPropertyChanged("CkptPath");
+                }
+            }
+        }
+        #endregion
+
         #region スキップグリッド[Skip_grid]プロパティ
         /// <summary>
         /// スキップグリッド[Skip_grid]プロパティ用変数
@@ -604,6 +629,7 @@ namespace PromptMaker.Models
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
                 command.AppendLine(this.UsePlms ? "--plms" : "");
                 command.AppendLine(!string.IsNullOrWhiteSpace(this.Outdir) ? $"--outdir {this.Outdir}" : "");
+                command.AppendLine(!string.IsNullOrWhiteSpace(this.CkptPath) ? $"--ckpt {this.CkptPath}" : "");
 
                 return command.ToString().Replace("\r\n", " ");
             }
@@ -704,6 +730,33 @@ namespace PromptMaker.Models
                 if (dlg.ShowDialog() == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
                 {
                     this.Outdir = dlg.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region ファイルを開くダイアログ
+        /// <summary>
+        /// ファイルを開くダイアログ
+        /// </summary>
+        public void OpenCkptFile()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new OpenFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "モデルファイル (*.ckpt)|*.ckpt";
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    this.CkptPath = dialog.FileName;
                 }
             }
             catch (Exception ex)
