@@ -452,30 +452,38 @@ namespace PromptMaker.ViewModels
         /// <returns>出力先フォルダ</returns>
         private string GetOutputFilePath()
         {
-            string path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-            switch (this.Parameter.ScriptType)
+            if (string.IsNullOrWhiteSpace(this.Parameter.Outdir))
             {
-                case ScriptTypeEnum.Txt2Img:
-                default:
-                    {
-                        path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-                        PathManager.CreateDirectory(path);
-                        break;
-                    }
-                case ScriptTypeEnum.Img2Img:
-                    {
-                        path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
-                        PathManager.CreateDirectory(path);
-                        break;
-                    }
-                case ScriptTypeEnum.Inpaint:
-                    {
-                        path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
-                        PathManager.CreateDirectory(path);
-                        break;
-                    }
+                string path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+                switch (this.Parameter.ScriptType)
+                {
+                    case ScriptTypeEnum.Txt2Img:
+                    default:
+                        {
+                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+                            PathManager.CreateDirectory(path);
+                            break;
+                        }
+                    case ScriptTypeEnum.Img2Img:
+                        {
+                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
+                            PathManager.CreateDirectory(path);
+                            break;
+                        }
+                    case ScriptTypeEnum.Inpaint:
+                        {
+                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
+                            PathManager.CreateDirectory(path);
+                            break;
+                        }
+                }
+                return path;
             }
-            return path;
+            else
+            {
+                return this.Parameter.Outdir;
+            }
+            
         }
         #endregion
 
@@ -563,10 +571,7 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
-
         private string _LastFilePath = string.Empty;
-
 
         #region サブ関数
         /// <summary>
