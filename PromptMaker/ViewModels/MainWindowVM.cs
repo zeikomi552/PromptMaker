@@ -85,23 +85,19 @@ namespace PromptMaker.ViewModels
 
         #region 設定ファイルオブジェクト[SettingConf]プロパティ
         /// <summary>
-        /// 設定ファイルオブジェクト[SettingConf]プロパティ用変数
-        /// </summary>
-        ConfigManager<SettingConfM> _SettingConf = new ConfigManager<SettingConfM>("Config", "Setting.conf", new SettingConfM());
-        /// <summary>
         /// 設定ファイルオブジェクト[SettingConf]プロパティ
         /// </summary>
         public ConfigManager<SettingConfM> SettingConf
         {
             get
             {
-                return _SettingConf;
+                return GBLValues.GetInstance().SettingConf;
             }
             set
             {
-                if (_SettingConf == null || !_SettingConf.Equals(value))
+                if (GBLValues.GetInstance().SettingConf == null || !GBLValues.GetInstance().SettingConf.Equals(value))
                 {
-                    _SettingConf = value;
+                    GBLValues.GetInstance().SettingConf = value;
                     NotifyPropertyChanged("SettingConf");
                 }
             }
@@ -261,7 +257,12 @@ namespace PromptMaker.ViewModels
         {
             Task.Run(()=>{
                 // ディレクトリパス
-                string path = GetOutputFilePath();
+                string path = this.Parameter.GetOutputFilePath();
+
+                // サンプルフォルダ配下
+                path = Path.Combine(path, "samples");
+
+                PathManager.CreateDirectory(path);
 
                 // DirectoryInfoのインスタンスを生成する
                 DirectoryInfo di = new DirectoryInfo(path);
@@ -445,48 +446,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-        #region 出力先フォルダの取得
-        /// <summary>
-        /// 出力先フォルダの取得
-        /// </summary>
-        /// <returns>出力先フォルダ</returns>
-        private string GetOutputFilePath()
-        {
-            if (string.IsNullOrWhiteSpace(this.Parameter.Outdir))
-            {
-                string path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-                switch (this.Parameter.ScriptType)
-                {
-                    case ScriptTypeEnum.Txt2Img:
-                    default:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                    case ScriptTypeEnum.Img2Img:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                    case ScriptTypeEnum.Inpaint:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                }
-                return path;
-            }
-            else
-            {
-                return this.Parameter.Outdir;
-            }
-            
-        }
-        #endregion
-
         #region コマンドの実行
         /// <summary>
         /// コマンドの実行
@@ -501,13 +460,8 @@ namespace PromptMaker.ViewModels
                 string[] prompt_list = prompt_bk.Split("\r\n");
 
                 // 親ディレクトリ
-                var parent_dir = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+                var parent_dir = this.Parameter.GetOutputFilePath();
                 var path = Path.Combine(parent_dir, this.Parameter.Prefix);
-
-                // DirectoryInfoのインスタンスを生成する
-                DirectoryInfo di = new DirectoryInfo(path);
-
-                StringBuilder article = new StringBuilder();
 
                 // 繰り返し回数指定
                 for (int cnt = 0; cnt < this.Parameter.Repeat; cnt++)
@@ -518,50 +472,14 @@ namespace PromptMaker.ViewModels
                         // 有効なもののみ実行
                         if (composer.IsEnable)
                         {
-                            article.AppendLine($"## {composer.Description}({composer.Prompt})");
                             foreach (var prompt in prompt_list)
                             {
-                                article.AppendLine($"### {prompt}");
-                                article.AppendLine($"");
-
-                                this.Parameter.Prompt = prompt + " " + composer.Prompt; // プロンプトの作成
-                                string command = this.Parameter.Command;                // コマンドの保持
-
-                                // 記事作成の場合
-                                if (this.Parameter.IsOutArticle)
-                                {
-                                    ExecuteSub(sender, ev, true, $"Prompt -> {this.Parameter.Prompt}\r\n{command}", this.Parameter.Prefix);
-
-                                    // ディレクトリ直下のすべてのファイル一覧を取得する
-                                    FileInfo[] fiAlls = di.GetFiles();
-                                    var file = fiAlls.Last();
-                                    article.AppendLine($"Prompt:{this.Parameter.Prompt}");
-                                    article.AppendLine($"```");
-                                    article.AppendLine($"{command}");
-                                    article.AppendLine($"```");
-                                    article.AppendLine($"");
-                                    article.AppendLine($"[![]({this.Parameter.Prefix}/{file.Name})]({this.Parameter.Prefix}/{file.Name})");
-                                }
-                                else
-                                {
-                                    ExecuteSub(sender, ev);
-                                }
+                                ExecuteSub(sender, ev, this.Parameter.DebugF);
                             }
                         }
                     }
                 }
 
-                if(this.Parameter.IsOutArticle)
-                {
-                    string outpath = Path.Combine(parent_dir, $"{this.Parameter.Prefix}.md");
-                    // （1）テキストファイルを開いて（なければ作って）StreamWriterオブジェクトを得る
-                    using (StreamWriter writer = new StreamWriter(outpath, false, Encoding.UTF8))
-                    {
-                        // （2）ファイルにテキストを書き込む
-                        writer.WriteLine(article.ToString());
-
-                    } // （3）usingブロックを抜けるときにファイルが閉じられる
-                }
                 this.Parameter.Prompt = prompt_bk;
             }
             catch (Exception ex)
@@ -592,23 +510,6 @@ namespace PromptMaker.ViewModels
                     return;
                 }
 
-                var config = this.SettingConf;
-
-                // Set working directory and create process
-                var workingDirectory = Path.GetFullPath("Scripts");
-
-                var myProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = "cmd.exe",
-                        RedirectStandardInput = true,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        WorkingDirectory = this.SettingConf.Item.CurrentDir
-                    }
-                };
-
                 // Inpaintingの場合のみ事前にファイルを作成する
                 if (this.Parameter.InpaintF)
                 {
@@ -624,71 +525,55 @@ namespace PromptMaker.ViewModels
                     }
                 }
 
-                string command = this.Parameter.Command!;   // コマンドの保存
-                this.Parameter.CommandBackup = command;     // コマンドの保存
-
-                myProcess.Start();
-                using (var sw = myProcess.StandardInput)
-                {
-                    if (sw.BaseStream.CanWrite)
-                    {
-                        // Vital to activate Anaconda
-                        sw.WriteLine(@"C:\ProgramData\Anaconda3\Scripts\activate.bat");
-                        // Activate your environment
-                        sw.WriteLine("conda activate ldm");
-                        // change directory
-                        sw.WriteLine($"cd {this.SettingConf.Item.CurrentDir}");
-                        // Any other commands you want to run
-                        sw.WriteLine(command!);
-                    }
-                }
-
-                StreamReader myStreamReader = myProcess.StandardOutput;
-
-                string? myString = myStreamReader.ReadLine();
-                myProcess.WaitForExit();
-                myProcess.Close();
-
-                Console.WriteLine(myString);
-
-                // 出力ファイルパスを取得する
-                string path = GetOutputFilePath();
-
-                // DirectoryInfoのインスタンスを生成する
-                DirectoryInfo di = new DirectoryInfo(path);
-
-                // ディレクトリ直下のすべてのファイル一覧を取得する
-                FileInfo[] fiAlls = di.GetFiles();
+                // コマンドの実行処理
+                this.Parameter.CommandExecute();
 
                 // イメージリストの更新
                 RefreshImageList();
 
-                // 出力先ファイルパスを取得し画面表示
-                string filepath = fiAlls.Last().FullName;
 
-                // 画像ファイル確認
-                if (this._LastFilePath != filepath)
-                {
-                    this._LastFilePath = this.ImagePath = filepath;
-                }
-                else return;
 
-                this.Parameter.OutputFilePath = filepath;
 
-                // ファイルリストの表示
-                this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
 
-                // 最初の行に履歴を保存
-                this.History.Items.Insert(0, this.Parameter.ShallowCopy<ParameterM>());
+                //// 出力ファイルパスを取得する
+                //string path = this.Parameter.GetOutputFilePath();
 
-                // 最後に実行したプロンプトを保存
-                this.SettingConf.Item.LastPrompt = this.Parameter.Prompt;
+                //// DirectoryInfoのインスタンスを生成する
+                //DirectoryInfo di = new DirectoryInfo(path);
 
-                if(debug_f)
-                {
-                    // 文字列を画像に挿入
-                    SetDetail(this._LastFilePath, msg, keyword);
-                }
+                //// ディレクトリ直下のすべてのファイル一覧を取得する
+                //FileInfo[] fiAlls = di.GetFiles();
+
+
+                //// 出力先ファイルパスを取得し画面表示
+                //string filepath = fiAlls.Last().FullName;
+
+                //// 画像ファイル確認
+                //if (this._LastFilePath != filepath)
+                //{
+                //    this._LastFilePath = this.ImagePath = filepath;
+                //}
+                //else return;
+
+                //this.Parameter.OutputFilePath = filepath;
+
+                //// ファイルリストの表示
+                //this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
+
+                //// 最初の行に履歴を保存
+                //this.History.Items.Insert(0, this.Parameter.ShallowCopy<ParameterM>());
+
+                //// 最後に実行したプロンプトを保存
+                //this.SettingConf.Item.LastPrompt = this.Parameter.Prompt;
+
+                //if(debug_f)
+                //{
+                //    // 文字列を画像に挿入
+                //    SetDetail(this._LastFilePath, this.Parameter.CommandBackup, keyword);
+
+                //    // ファイル出力
+                //    File.WriteAllText(this._LastFilePath + ".log", this.Parameter.CommandBackup + Environment.NewLine);
+                //}
             }
             catch (Exception ex)
             {
@@ -730,6 +615,27 @@ namespace PromptMaker.ViewModels
 
                     resizebmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                 }
+            }
+        }
+        #endregion
+
+        #region 出力先ディレクトリを選択する
+        /// <summary>
+        /// 出力先ディレクトリを選択する
+        /// </summary>
+        public void OpenOutDir()
+        {
+            try
+            {
+                // 出力先の変更
+                this.Parameter.OpenOutDir();
+
+                // イメージリストの更新
+                RefreshImageList();
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
         #endregion

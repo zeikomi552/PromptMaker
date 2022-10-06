@@ -375,6 +375,7 @@
                                         </Button>
                                     </StackPanel>
 
+
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock ToolTip="出力先ディレクトリ"
                                                    TextAlignment="Right" Width="90" Text="出力先" VerticalAlignment="Center" Margin="5"/>
@@ -383,17 +384,17 @@
                                         <Button Margin="5" Content="フォルダ">
                                             <b:Interaction.Triggers>
                                                 <b:EventTrigger EventName="Click">
-                                                    <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenOutDir"/>
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenOutDir"/>
                                                 </b:EventTrigger>
                                             </b:Interaction.Triggers>
                                         </Button>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="ファイル出力時にフォルダ名とファイル名接頭辞に使用する"
-                                                   TextAlignment="Right" Width="90" Text="ブログファイル作成" VerticalAlignment="Center" Margin="5"/>
+                                        <TextBlock ToolTip="ファイル出力時に別のフォルダにコマンドをうめこんで出力する"
+                                                   TextAlignment="Right" Width="90" Text="デバッグ" VerticalAlignment="Center" Margin="5"/>
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.IsOutArticle}"/>
+                                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.DebugF}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock ToolTip="ファイル出力時にフォルダ名とファイル名接頭辞に使用する"

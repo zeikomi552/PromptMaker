@@ -1,14 +1,20 @@
 ﻿using Microsoft.Win32;
 using MVVMCore.BaseClass;
 using MVVMCore.Common.Utilities;
+using MVVMCore.Common.Wrapper;
 using PromptMaker.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 namespace PromptMaker.Models
 {
@@ -41,23 +47,19 @@ namespace PromptMaker.Models
 
         #region 設定ファイルオブジェクト[SettingConf]プロパティ
         /// <summary>
-        /// 設定ファイルオブジェクト[SettingConf]プロパティ用変数
-        /// </summary>
-        ConfigManager<SettingConfM> _SettingConf = new ConfigManager<SettingConfM>("Config", "Setting.conf", new SettingConfM());
-        /// <summary>
         /// 設定ファイルオブジェクト[SettingConf]プロパティ
         /// </summary>
         public ConfigManager<SettingConfM> SettingConf
         {
             get
             {
-                return _SettingConf;
+                return GBLValues.GetInstance().SettingConf;
             }
             set
             {
-                if (_SettingConf == null || !_SettingConf.Equals(value))
+                if (GBLValues.GetInstance().SettingConf == null || !GBLValues.GetInstance().SettingConf.Equals(value))
                 {
-                    _SettingConf = value;
+                    GBLValues.GetInstance().SettingConf = value;
                     NotifyPropertyChanged("SettingConf");
                 }
             }
@@ -531,31 +533,6 @@ namespace PromptMaker.Models
         }
         #endregion
 
-        #region 記事を自動生成[IsOutArticle]プロパティ
-        /// <summary>
-        /// 記事を自動生成[IsOutArticle]プロパティ用変数
-        /// </summary>
-        bool _IsOutArticle = false;
-        /// <summary>
-        /// 記事を自動生成[IsOutArticle]プロパティ
-        /// </summary>
-        public bool IsOutArticle
-        {
-            get
-            {
-                return _IsOutArticle;
-            }
-            set
-            {
-                if (!_IsOutArticle.Equals(value))
-                {
-                    _IsOutArticle = value;
-                    NotifyPropertyChanged("IsOutArticle");
-                }
-            }
-        }
-        #endregion
-
         #region PLMSを使用する[UsePlms]プロパティ
         /// <summary>
         /// PLMSを使用する[UsePlms]プロパティ用変数
@@ -580,6 +557,32 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        #region デバッグフラグ[DebugF]プロパティ
+        /// <summary>
+        /// デバッグフラグ[DebugF]プロパティ用変数
+        /// </summary>
+        bool _DebugF = false;
+        /// <summary>
+        /// デバッグフラグ[DebugF]プロパティ
+        /// </summary>
+        public bool DebugF
+        {
+            get
+            {
+                return _DebugF;
+            }
+            set
+            {
+                if (!_DebugF.Equals(value))
+                {
+                    _DebugF = value;
+                    NotifyPropertyChanged("DebugF");
+                }
+            }
+        }
+        #endregion
+
 
 
         Random _Rand = new Random();
@@ -762,6 +765,131 @@ namespace PromptMaker.Models
             catch (Exception ex)
             {
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+
+        #region 出力先フォルダの取得
+        /// <summary>
+        /// 出力先フォルダの取得
+        /// </summary>
+        /// <returns>出力先フォルダ</returns>
+        public string GetOutputFilePath()
+        {
+            if (string.IsNullOrWhiteSpace(this.Outdir))
+            {
+                string path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+                switch (this.ScriptType)
+                {
+                    case ScriptTypeEnum.Txt2Img:
+                    default:
+                        {
+                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
+                            PathManager.CreateDirectory(path);
+                            break;
+                        }
+                    case ScriptTypeEnum.Img2Img:
+                        {
+                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
+                            PathManager.CreateDirectory(path);
+                            break;
+                        }
+                    case ScriptTypeEnum.Inpaint:
+                        {
+                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
+                            PathManager.CreateDirectory(path);
+                            break;
+                        }
+                }
+                return path;
+            }
+            else
+            {
+                return this.Outdir;
+            }
+
+        }
+        #endregion
+
+        public void CommandExecute()
+        {
+            var config = this.SettingConf;
+
+            // Set working directory and create process
+            var workingDirectory = Path.GetFullPath("Scripts");
+
+            var myProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = "cmd.exe",
+                    RedirectStandardInput = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    WorkingDirectory = this.SettingConf.Item.CurrentDir
+                }
+            };
+
+            string command = this.Command!;   // コマンドの保存
+            this.CommandBackup = command;     // コマンドの保存
+
+            myProcess.Start();
+            using (var sw = myProcess.StandardInput)
+            {
+                if (sw.BaseStream.CanWrite)
+                {
+                    // Vital to activate Anaconda
+                    sw.WriteLine(@"C:\ProgramData\Anaconda3\Scripts\activate.bat");
+                    // Activate your environment
+                    sw.WriteLine("conda activate ldm");
+                    // change directory
+                    sw.WriteLine($"cd {this.SettingConf.Item.CurrentDir}");
+                    // Any other commands you want to run
+                    sw.WriteLine(command!);
+                }
+            }
+
+            StreamReader myStreamReader = myProcess.StandardOutput;
+
+            string? myString = myStreamReader.ReadLine();
+            myProcess.WaitForExit();
+            myProcess.Close();
+        }
+
+        #region キャンバスの保存処理
+        /// <summary>
+        /// キャンバスの保存処理
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="filePath"></param>
+        private static void SaveCanvas(UIElement element, String filePath)
+        {
+            var bounds = VisualTreeHelper.GetDescendantBounds(element);
+            var width = (int)bounds.Width;
+            var height = (int)bounds.Height;
+
+            // 描画先
+            var drawingVisual = new DrawingVisual();
+            using (var ctx = drawingVisual.RenderOpen())
+            {
+                var vb = new VisualBrush(element);
+                ctx.DrawRectangle(System.Windows.Media.Brushes.Black, null, new Rect(new System.Windows.Point(width, height), new System.Windows.Point(width, height)));
+                ((InkCanvas)element).Strokes.Draw(ctx);
+            }
+
+            // ビットマップに変換
+            var rtb = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
+            rtb.Render(drawingVisual);
+
+            // エンコーダー
+            BitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            // ファイル保存
+            using (var fs = File.Create(filePath))
+            {
+                encoder.Save(fs);
             }
         }
         #endregion
