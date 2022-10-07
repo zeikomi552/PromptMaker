@@ -10,3 +10,5 @@
 /PromptMaker/obj
 /MVVMCore/obj
 /PromptMaker/bin/Debug/net6.0-windows10.0.18362.0
+/MVVMCore/bin/Release/net5.0-windows
+/PromptMaker/bin/Release/net6.0-windows

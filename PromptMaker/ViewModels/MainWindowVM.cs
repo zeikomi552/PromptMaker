@@ -24,6 +24,7 @@ using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Input;
+using Microsoft.VisualBasic.FileIO;
 
 namespace PromptMaker.ViewModels
 {
@@ -346,7 +347,7 @@ namespace PromptMaker.ViewModels
                     if (file_info != null)
                     {
                         string str = Path.GetDirectoryName(file_info.FullName)!;
-                        Process.Start("explorer.exe", str); // 指定したフォルダを開く
+                        Process.Start("explorer.exe", string.Format(@"/select,""{0}", file_info.FullName)); // エクスプローラを開く
                     }
                 }
 
@@ -406,6 +407,7 @@ namespace PromptMaker.ViewModels
                     {
                         var index = this.ImagePathList.Items.IndexOf(file_info);
                         this.ImagePathList.Items.Remove(file_info);
+                        FileSystem.DeleteFile(file_info.FullName, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         if (index >= 1)
                         {
                             this.ImagePath = this.ImagePathList.ElementAt(index - 1).FullName;
@@ -474,6 +476,7 @@ namespace PromptMaker.ViewModels
                         {
                             foreach (var prompt in prompt_list)
                             {
+                                this.Parameter.Prompt = prompt + " " + composer.Prompt;
                                 ExecuteSub(sender, ev, this.Parameter.DebugF);
                             }
                         }

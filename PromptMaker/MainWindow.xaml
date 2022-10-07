@@ -15,6 +15,7 @@
         Title="MainWindow" Height="1200" Width="1400">
     <mah:MetroWindow.Resources>
         <Converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
+        <Converters:FileFullName2FileNameConverter x:Key="FileFullName2FileNameConverter"/>
         <Converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <ViewModels:MainWindowVM x:Key="vm"/>
     </mah:MetroWindow.Resources>
@@ -121,7 +122,7 @@
                                       CanUserDeleteRows="True" ItemsSource="{Binding PromptComposerConf.Item.Items}">
                                     <DataGrid.Columns>
                                         <DataGridCheckBoxColumn Header="有効" Binding="{Binding IsEnable}"/>
-                                        <DataGridTextColumn Header="プロンプト" Binding="{Binding Prompt}"/>
+                                        <DataGridTextColumn Width="150" Header="プロンプト" Binding="{Binding Prompt}"/>
                                         <DataGridTextColumn Header="説明" Binding="{Binding Description}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
@@ -290,6 +291,7 @@
                                                         </ContextMenu>
                                                     </Image.ContextMenu>
                                                 </Image>
+                                                <TextBlock HorizontalAlignment="Center" Text="{Binding FullName, Converter={StaticResource FileFullName2FileNameConverter}}"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
