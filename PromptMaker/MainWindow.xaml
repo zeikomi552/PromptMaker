@@ -92,7 +92,6 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="2*"/>
-                        <RowDefinition Height="150"/>
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="1">
@@ -430,29 +429,6 @@
 
                         </GroupBox>
                     </Grid>
-
-                    <GroupBox Grid.Row="2" Header="履歴">
-                        <DataGrid ItemsSource="{Binding History.Items}"
-                              SelectedItem="{Binding History.SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              IsReadOnly="True" AutoGenerateColumns="False">
-                            <b:Interaction.Triggers>
-                                <b:EventTrigger EventName="SelectionChanged">
-                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="SelectionChanged"/>
-                                </b:EventTrigger>
-                                <b:EventTrigger EventName="MouseDoubleClick">
-                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="GridDoubleClick"/>
-                                </b:EventTrigger>
-                            </b:Interaction.Triggers>
-
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="幅" Binding="{Binding Width}"/>
-                                <DataGridTextColumn Header="高さ" Binding="{Binding Height}"/>
-                                <DataGridTextColumn Header="シード" Binding="{Binding Height}"/>
-                                <DataGridTextColumn Header="ステップ数" Binding="{Binding Ddim_steps}"/>
-                                <DataGridTextColumn Header="プロンプト" Binding="{Binding CommandBackup}" Width="*"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </GroupBox>
                 </Grid>
             </Grid>
         </DockPanel>
