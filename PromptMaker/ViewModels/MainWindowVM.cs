@@ -570,8 +570,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-        private string _LastFilePath = string.Empty;
-
         #region サブ関数
         /// <summary>
         /// サブ関数
