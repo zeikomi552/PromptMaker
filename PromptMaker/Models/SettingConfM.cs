@@ -96,6 +96,39 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region Real-ESRGAN実行ファイルパスの選択ダイアログ
+        /// <summary>
+        /// Python実行ファイルパスの選択ダイアログ
+        /// </summary>
+        public void OpenFileDialogForRealESRGANExe()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new OpenFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "Real-ESRGAN Exeパス (*.exe)|*.exe";
+
+                if (!string.IsNullOrEmpty(this.PythonPath))
+                {
+                    string sDirName = System.IO.Path.GetDirectoryName(this.PythonPath)!;
+                    dialog.InitialDirectory = sDirName;
+                }
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    this.RealEsrganExePath = dialog.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
         #region カレントディレクトリの選択ダイアログ
         /// <summary>
         /// カレントディレクトリの選択ダイアログ
@@ -148,5 +181,32 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        #region Real-ESRGANの実行ファイルパス[RealEsrganExePath]プロパティ
+        /// <summary>
+        /// Real-ESRGANの実行ファイルパス[RealEsrganExePath]プロパティ用変数
+        /// </summary>
+        string _RealEsrganExePath = string.Empty;
+        /// <summary>
+        /// Real-ESRGANの実行ファイルパス[RealEsrganExePath]プロパティ
+        /// </summary>
+        public string RealEsrganExePath
+        {
+            get
+            {
+                return _RealEsrganExePath;
+            }
+            set
+            {
+                if (_RealEsrganExePath == null || !_RealEsrganExePath.Equals(value))
+                {
+                    _RealEsrganExePath = value;
+                    NotifyPropertyChanged("RealEsrganExePath");
+                }
+            }
+        }
+        #endregion
+
+
     }
 }

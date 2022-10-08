@@ -25,6 +25,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Input;
 using Microsoft.VisualBasic.FileIO;
+using Microsoft.Win32;
 
 namespace PromptMaker.ViewModels
 {
@@ -378,6 +379,66 @@ namespace PromptMaker.ViewModels
                     {
                         Process.Start("mspaint", file_info.FullName); // 指定したフォルダを開く
                     }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region RealESRGANの保存先を開くダイアログ
+        /// <summary>
+        /// RealESRGANの保存先を開くダイアログ
+        /// </summary>
+        public void SaveFilePathOpen()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new SaveFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "PNGファイル (*.png)|*.png";
+
+                // 実行ファイルの存在確認
+                if(!File.Exists(this.SettingConf.Item.RealEsrganExePath))
+                {
+                    ShowMessage.ShowNoticeOK("Real-ESRGANの実行ファイルが見つかりませんでした。\r\n設定画面からReal-ESRGANのパス設定をしてください", "通知");
+                    return;
+                }
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    var myProcess = new Process
+                    {
+                        StartInfo = new ProcessStartInfo()
+                        {
+                            FileName = "cmd.exe",
+                            RedirectStandardInput = true,
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            WorkingDirectory = this.SettingConf.Item.CurrentDir
+                        }
+                    };
+
+                    myProcess.Start();
+                    using (var sw = myProcess.StandardInput)
+                    {
+                        if (sw.BaseStream.CanWrite)
+                        {
+                            sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{this.ImagePathList.SelectedItem}\" -o \"{dialog.FileName}\"");
+                        }
+                    }
+
+                    StreamReader myStreamReader = myProcess.StandardOutput;
+
+                    string? myString = myStreamReader.ReadLine();
+                    myProcess.WaitForExit();
+                    myProcess.Close();
                 }
 
             }
