@@ -488,6 +488,23 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region Img2Imgの初期化フォルダに移動
+        /// <summary>
+        /// Img2Imgの初期化フォルダに移動
+        /// </summary>
+        public void MoveImg2Img()
+        {
+            try
+            {
+                this.Parameter.SetInitFile(this.ImagePathList.SelectedItem.FullName);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
         #region 画像パスの選択変更
         /// <summary>
         /// 画像パスの選択変更
@@ -538,7 +555,7 @@ namespace PromptMaker.ViewModels
                             foreach (var prompt in prompt_list)
                             {
                                 this.Parameter.Prompt = prompt + " " + composer.Prompt;
-                                ExecuteSub(sender, ev, this.Parameter.DebugF);
+                                ExecuteSub(sender, ev);
                             }
                         }
                     }
@@ -564,7 +581,7 @@ namespace PromptMaker.ViewModels
         /// <param name="debug_f"></param>
         /// <param name="msg"></param>
         /// <param name="keyword">文字列挿入画像のフォルダ名とファイルプレフィスク</param>
-        private void ExecuteSub(object sender, EventArgs ev, bool debug_f = false, string msg = "", string keyword = "debug")
+        private void ExecuteSub(object sender, EventArgs ev)
         {
             try
             {
@@ -589,55 +606,26 @@ namespace PromptMaker.ViewModels
                     }
                 }
 
+                string path = this.Parameter.Outdir;
+                if (string.IsNullOrEmpty((this.Parameter.Outdir)))
+                {
+                    path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples"); ;
+                }
+
+                // テキストファイル出力（新規作成）
+                using (StreamWriter sw = new StreamWriter(Path.Combine(path, $"{DateTime.Today.ToString("yyyy-MM-dd")}.txt"), true))
+                {
+                    sw.WriteLine($"--------");
+                    sw.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
+                    sw.WriteLine($"Prompt->{this.Parameter.Prompt}");
+                    sw.WriteLine($"Command->{this.Parameter.Command}");
+                }
+
                 // コマンドの実行処理
                 this.Parameter.CommandExecute();
 
                 // イメージリストの更新
                 RefreshImageList();
-
-
-
-
-
-                //// 出力ファイルパスを取得する
-                //string path = this.Parameter.GetOutputFilePath();
-
-                //// DirectoryInfoのインスタンスを生成する
-                //DirectoryInfo di = new DirectoryInfo(path);
-
-                //// ディレクトリ直下のすべてのファイル一覧を取得する
-                //FileInfo[] fiAlls = di.GetFiles();
-
-
-                //// 出力先ファイルパスを取得し画面表示
-                //string filepath = fiAlls.Last().FullName;
-
-                //// 画像ファイル確認
-                //if (this._LastFilePath != filepath)
-                //{
-                //    this._LastFilePath = this.ImagePath = filepath;
-                //}
-                //else return;
-
-                //this.Parameter.OutputFilePath = filepath;
-
-                //// ファイルリストの表示
-                //this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
-
-                //// 最初の行に履歴を保存
-                //this.History.Items.Insert(0, this.Parameter.ShallowCopy<ParameterM>());
-
-                //// 最後に実行したプロンプトを保存
-                //this.SettingConf.Item.LastPrompt = this.Parameter.Prompt;
-
-                //if(debug_f)
-                //{
-                //    // 文字列を画像に挿入
-                //    SetDetail(this._LastFilePath, this.Parameter.CommandBackup, keyword);
-
-                //    // ファイル出力
-                //    File.WriteAllText(this._LastFilePath + ".log", this.Parameter.CommandBackup + Environment.NewLine);
-                //}
             }
             catch (Exception ex)
             {

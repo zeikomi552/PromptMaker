@@ -624,8 +624,10 @@ namespace PromptMaker.Models
             {
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/txt2img.py");
+                //command.AppendLine("python optimizedSD/optimized_txt2img.py");
                 command.AppendLine($"--prompt \"{this.Prompt}\"");
                 command.AppendLine($"--n_iter {N_iter}");
+                //command.AppendLine($"--turbo");
                 command.AppendLine(this.Width <= 0 ? "" : $"--W {this.Width}");
                 command.AppendLine(this.Height <= 0 ? "" : $"--H {this.Height}");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
@@ -656,6 +658,8 @@ namespace PromptMaker.Models
                 command.AppendLine($"--strength {this.Strength}");
                 command.AppendLine($"--n_sample {this.N_Sample}");
                 command.AppendLine($"--scale {this.Guidance_Scale}");
+                command.AppendLine(!string.IsNullOrWhiteSpace(this.Outdir) ? $"--outdir {this.Outdir}" : "");
+                command.AppendLine(this.UsePlms ? "--plms" : "");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
 
@@ -704,7 +708,32 @@ namespace PromptMaker.Models
                 // ダイアログを表示する
                 if (dialog.ShowDialog() == true)
                 {
-                    this.InitFilePath = dialog.FileName;
+                    SetInitFile(dialog.FileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region 初期ファイルパスをセットする
+        /// <summary>
+        /// 初期ファイルパスをセットする
+        /// </summary>
+        /// <param name="filepath"></param>
+        public void SetInitFile(string filepath)
+        {
+            try
+            {
+                if (File.Exists(filepath))
+                {
+                    this.InitFilePath = filepath;
+                }
+                else
+                {
+                    ShowMessage.ShowNoticeOK("ファイルが存在しません。", "通知");
                 }
             }
             catch (Exception ex)
@@ -812,6 +841,10 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region コマンド実行処理
+        /// <summary>
+        /// コマンド実行処理
+        /// </summary>
         public void CommandExecute()
         {
             var config = this.SettingConf;
@@ -851,11 +884,11 @@ namespace PromptMaker.Models
             }
 
             StreamReader myStreamReader = myProcess.StandardOutput;
-
             string? myString = myStreamReader.ReadLine();
             myProcess.WaitForExit();
             myProcess.Close();
         }
+        #endregion
 
         #region キャンバスの保存処理
         /// <summary>
