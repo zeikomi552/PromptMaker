@@ -129,6 +129,34 @@ namespace PromptMaker.Models
         }
         #endregion
 
+
+        #region Real-ESRGAN実行ファイルパスの選択ダイアログ
+        /// <summary>
+        /// Python実行ファイルパスの選択ダイアログ
+        /// </summary>
+        public void OpenFileDialogForGFPGANPath()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new OpenFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "GFPGAN Python (*.py)|*.py";
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    this.GFPGANPyPath = dialog.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
         #region カレントディレクトリの選択ダイアログ
         /// <summary>
         /// カレントディレクトリの選択ダイアログ
@@ -206,6 +234,33 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        #region GFPGANPythonファイルパス[GFPGANPyPath]プロパティ
+        /// <summary>
+        /// GFPGANPythonファイルパス[GFPGANPyPath]プロパティ用変数
+        /// </summary>
+        string _GFPGANPyPath = string.Empty;
+        /// <summary>
+        /// GFPGANPythonファイルパス[GFPGANPyPath]プロパティ
+        /// </summary>
+        public string GFPGANPyPath
+        {
+            get
+            {
+                return _GFPGANPyPath;
+            }
+            set
+            {
+                if (_GFPGANPyPath == null || !_GFPGANPyPath.Equals(value))
+                {
+                    _GFPGANPyPath = value;
+                    NotifyPropertyChanged("GFPGANPyPath");
+                }
+            }
+        }
+        #endregion
+
+
 
 
     }

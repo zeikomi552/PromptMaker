@@ -424,6 +424,21 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        public void ExecuteGFPGAN()
+        {
+            try
+            {
+                var path = this.ImagePathList.SelectedItem;
+                GfpGanM.Execute(this.SettingConf.Item.GFPGANPyPath, path.FullName, this.Parameter.Outdir);
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+
+
         #region ファイル削除処理
         /// <summary>
         /// ファイル削除処理
