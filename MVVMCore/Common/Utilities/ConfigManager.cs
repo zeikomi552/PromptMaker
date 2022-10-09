@@ -1,4 +1,5 @@
-﻿using MVVMCore.BaseClass;
+﻿using Microsoft.Win32;
+using MVVMCore.BaseClass;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -102,6 +103,33 @@ namespace MVVMCore.Common.Utilities
         }
         #endregion
 
+        #region ファイルの保存処理
+        /// <summary>
+        /// ファイルの保存処理
+        /// </summary>
+        /// <param name="flter">フィルタ条件</param>
+        /// <returns>true:保存成功 false:保存先が選ばれなかった</returns>
+        public bool SaveXML(string flter)
+        {
+            // ダイアログのインスタンスを生成
+            var dialog = new SaveFileDialog();
+
+            // ファイルの種類を設定
+            dialog.Filter = flter;
+
+            // ダイアログを表示する
+            if (dialog.ShowDialog() == true)
+            {
+                XMLUtil.Seialize<T>(dialog.FileName, this.Item);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        #endregion
+
         #region ロード処理
         /// <summary>
         /// ロード処理
@@ -112,6 +140,33 @@ namespace MVVMCore.Common.Utilities
             if (File.Exists(this.ConfigFile))
             {
                 this.Item = XMLUtil.Deserialize<T>(this.ConfigFile);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        #endregion
+
+        #region ファイルのロード処理
+        /// <summary>
+        /// ファイルのロード処理
+        /// </summary>
+        /// <param name="flter">フィルター</param>
+        /// <returns>true:読み込み成功 false:ファイルが選ばれなかった</returns>
+        public bool LoadXML(string flter)
+        {
+            // ダイアログのインスタンスを生成
+            var dialog = new OpenFileDialog();
+
+            // ファイルの種類を設定
+            dialog.Filter = flter;
+
+            // ダイアログを表示する
+            if (dialog.ShowDialog() == true)
+            {
+                this.Item = XMLUtil.Deserialize<T>(dialog.FileName);
                 return true;
             }
             else

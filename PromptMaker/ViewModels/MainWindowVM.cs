@@ -622,6 +622,42 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region プロンプトリストの保存処理
+        /// <summary>
+        /// プロンプトリストの保存処理
+        /// </summary>
+        public void SavePromptList()
+        {
+            try
+            {
+                // 保存処理
+                this.PromptComposerConf.SaveXML("プロンプト構成要素ファイル (*.promptxml)|*.promptxml");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region プロンプトリストの読み込み処理
+        /// <summary>
+        /// プロンプトリストの読み込み処理
+        /// </summary>
+        public void LoadPromptList()
+        {
+            try
+            {
+                // ロード処理
+                this.PromptComposerConf.LoadXML("プロンプト構成要素ファイル (*.promptxml)|*.promptxml");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
         #region 出力先ディレクトリを選択する
         /// <summary>
         /// 出力先ディレクトリを選択する

@@ -107,6 +107,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
                                 </Grid.RowDefinitions>
                                 <DataGrid AutoGenerateColumns="False" Margin="5,5,5,5"
                                       SelectedItem="{Binding PromptComposerConf.Item.SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -147,6 +148,22 @@
                                         </b:Interaction.Triggers>
                                     </Button>
                                 </Grid>
+                                <StackPanel HorizontalAlignment="Center" Grid.Row="2" Orientation="Horizontal">
+                                    <Button Margin="5" Content="保存">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="SavePromptList"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Content="読込">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="LoadPromptList"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                </StackPanel>
                             </Grid>
                         </GroupBox>
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
@@ -425,12 +442,12 @@
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.HugeSizeF}"/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
+                                    <!--<StackPanel Orientation="Horizontal">
                                         <TextBlock ToolTip="ファイル出力時にフォルダ名とファイル名接頭辞に使用する"
                                                    TextAlignment="Right" Width="80" Text="プレフィックス" VerticalAlignment="Center" Margin="5"/>
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <TextBox Width="150" Text="{Binding Parameter.Prefix}"/>
-                                    </StackPanel>
+                                    </StackPanel>-->
                                 </StackPanel>
                             </Grid>
 
