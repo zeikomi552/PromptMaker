@@ -12,6 +12,7 @@ namespace PromptMaker.Models
 {
     public class GfpGanM
     {
+        #region GFPGANの実行
         /// <summary>
         /// GFPGANの実行
         /// </summary>
@@ -87,5 +88,6 @@ namespace PromptMaker.Models
                 throw;
             }
         }
+        #endregion
     }
 }

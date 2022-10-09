@@ -583,6 +583,31 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region 大きいサイズで作成するフラグ[HugeSizeF]プロパティ
+        /// <summary>
+        /// 大きいサイズで作成するフラグ[HugeSizeF]プロパティ用変数
+        /// </summary>
+        bool _HugeSizeF = false;
+        /// <summary>
+        /// 大きいサイズで作成するフラグ[HugeSizeF]プロパティ
+        /// </summary>
+        public bool HugeSizeF
+        {
+            get
+            {
+                return _HugeSizeF;
+            }
+            set
+            {
+                if (!_HugeSizeF.Equals(value))
+                {
+                    _HugeSizeF = value;
+                    NotifyPropertyChanged("HugeSizeF");
+                }
+            }
+        }
+        #endregion
+
 
 
         Random _Rand = new Random();
@@ -623,11 +648,26 @@ namespace PromptMaker.Models
             get
             {
                 StringBuilder command = new StringBuilder();
-                command.AppendLine("python scripts/txt2img.py");
-                //command.AppendLine("python optimizedSD/optimized_txt2img.py");
+
+                // 大きいサイズで作成する場合Optimizeの方を使用する
+                if (!this.HugeSizeF)
+                {
+                    command.AppendLine("python scripts/txt2img.py");
+                }
+                else
+                {
+                    command.AppendLine("python optimizedSD/optimized_txt2img.py");
+                }
+
                 command.AppendLine($"--prompt \"{this.Prompt}\"");
                 command.AppendLine($"--n_iter {N_iter}");
-                //command.AppendLine($"--turbo");
+
+                // 大きいサイズで作成する場合Optimizeの方を使用する
+                // 高速化のためturboを立てる
+                if (this.HugeSizeF)
+                {
+                    command.AppendLine($"--turbo");
+                }
                 command.AppendLine(this.Width <= 0 ? "" : $"--W {this.Width}");
                 command.AppendLine(this.Height <= 0 ? "" : $"--H {this.Height}");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
@@ -886,6 +926,7 @@ namespace PromptMaker.Models
             StreamReader myStreamReader = myProcess.StandardOutput;
             string? myString = myStreamReader.ReadLine();
             myProcess.WaitForExit();
+            string output = myProcess.StandardOutput.ReadToEnd(); // 標準出力の読み取り
             myProcess.Close();
         }
         #endregion

@@ -338,14 +338,14 @@
                                         <TextBlock TextAlignment="Right" Width="80" Text="幅" VerticalAlignment="Center" Margin="5"/>
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Width}" 
-                                            Minimum="128" Maximum="1024" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
+                                            Minimum="128" Maximum="2048" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
                                         <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Width}" VerticalAlignment="Center" Margin="5"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock TextAlignment="Right" Width="80" Text="高さ" VerticalAlignment="Center" Margin="5"/>
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Height}" 
-                                            Minimum="128" Maximum="1024" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
+                                            Minimum="128" Maximum="2048" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
                                         <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Height}" VerticalAlignment="Center" Margin="5"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
@@ -420,10 +420,10 @@
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="ファイル出力時に別のフォルダにコマンドをうめこんで出力する"
-                                                   TextAlignment="Right" Width="90" Text="デバッグ" VerticalAlignment="Center" Margin="5"/>
+                                        <TextBlock ToolTip="大きいサイズを作成したい場合に使用する、ただし処理は遅い"
+                                                   TextAlignment="Right" Width="90" Text="大きいサイズ用" VerticalAlignment="Center" Margin="5"/>
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.DebugF}"/>
+                                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.HugeSizeF}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock ToolTip="ファイル出力時にフォルダ名とファイル名接頭辞に使用する"
