@@ -195,7 +195,7 @@ namespace PromptMaker.Models
         /// <summary>
         /// 出力先ディレクトリ[Outdir]プロパティ用変数
         /// </summary>
-        string _Outdir = string.Empty;
+        string _Outdir = String.Empty;
         /// <summary>
         /// 出力先ディレクトリ[Outdir]プロパティ
         /// </summary>
@@ -673,7 +673,7 @@ namespace PromptMaker.Models
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
                 command.AppendLine(this.UsePlms ? "--plms" : "");
-                command.AppendLine(!string.IsNullOrWhiteSpace(this.Outdir) ? $"--outdir {this.Outdir}" : "");
+                command.AppendLine($"--outdir {this.Outdir}");
                 command.AppendLine(!string.IsNullOrWhiteSpace(this.CkptPath) ? $"--ckpt {this.CkptPath}" : "");
 
                 return command.ToString().Replace("\r\n", " ");
@@ -698,7 +698,7 @@ namespace PromptMaker.Models
                 command.AppendLine($"--strength {this.Strength}");
                 command.AppendLine($"--n_sample {this.N_Sample}");
                 command.AppendLine($"--scale {this.Guidance_Scale}");
-                command.AppendLine(!string.IsNullOrWhiteSpace(this.Outdir) ? $"--outdir {this.Outdir}" : "");
+                command.AppendLine($"--outdir {this.Outdir}");
                 command.AppendLine(this.UsePlms ? "--plms" : "");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
@@ -716,7 +716,7 @@ namespace PromptMaker.Models
             get
             {
                 string indir_path = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting");
-                string outdir_path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
+                string outdir_path = this.Outdir;
 
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/inpaint.py");
@@ -835,49 +835,6 @@ namespace PromptMaker.Models
             {
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
-        }
-        #endregion
-
-
-        #region 出力先フォルダの取得
-        /// <summary>
-        /// 出力先フォルダの取得
-        /// </summary>
-        /// <returns>出力先フォルダ</returns>
-        public string GetOutputFilePath()
-        {
-            if (string.IsNullOrWhiteSpace(this.Outdir))
-            {
-                string path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-                switch (this.ScriptType)
-                {
-                    case ScriptTypeEnum.Txt2Img:
-                    default:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                    case ScriptTypeEnum.Img2Img:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "img2img-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                    case ScriptTypeEnum.Inpaint:
-                        {
-                            path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "inpainting-samples");
-                            PathManager.CreateDirectory(path);
-                            break;
-                        }
-                }
-                return path;
-            }
-            else
-            {
-                return this.Outdir;
-            }
-
         }
         #endregion
 

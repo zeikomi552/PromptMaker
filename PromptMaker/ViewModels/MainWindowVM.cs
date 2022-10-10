@@ -26,6 +26,8 @@ using System.Windows.Media.TextFormatting;
 using System.Windows.Input;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32;
+using System.Windows.Threading;
+using Application = System.Windows.Application;
 
 namespace PromptMaker.ViewModels
 {
@@ -215,6 +217,8 @@ namespace PromptMaker.ViewModels
             {
                 this.SettingConf.LoadXML();
                 this.PromptComposerConf.LoadXML();
+                this.Parameter.Outdir = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs");
+
 
                 RefreshImageList();
 
@@ -232,9 +236,10 @@ namespace PromptMaker.ViewModels
         /// </summary>
         private void RefreshImageList()
         {
-            Task.Run(()=>{
+            Task.Run(() =>
+            {
                 // ディレクトリパス
-                string path = this.Parameter.GetOutputFilePath();
+                string path = this.Parameter.Outdir;
 
                 // サンプルフォルダ配下
                 path = Path.Combine(path, "samples");
@@ -247,14 +252,21 @@ namespace PromptMaker.ViewModels
                 // ディレクトリ直下のすべてのファイル一覧を取得する
                 FileInfo[] fiAlls = di.GetFiles("*.png");
 
-                if (fiAlls.Length > 0)
-                {
-                    // 出力先ファイルパスを取得し画面表示
-                    this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
+                   new Action(() =>
+                   {
+                       this.ImagePathList.Items.Clear();
+                       this.ImagePath = String.Empty;
 
-                    // ファイルリストの表示
-                    this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
-                }
+                       if (fiAlls.Length > 0)
+                       {
+                           // 出力先ファイルパスを取得し画面表示
+                           this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
+
+                           // ファイルリストの表示
+                           this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
+                       }
+                   }));
             });
         }
         #endregion
@@ -530,7 +542,7 @@ namespace PromptMaker.ViewModels
                 string[] prompt_list = prompt_bk.Split("\r\n");
 
                 // 親ディレクトリ
-                var parent_dir = this.Parameter.GetOutputFilePath();
+                var parent_dir = this.Parameter.Outdir;
                 var path = Path.Combine(parent_dir, this.Parameter.Prefix);
 
                 // 繰り返し回数指定
@@ -595,10 +607,6 @@ namespace PromptMaker.ViewModels
                 }
 
                 string path = this.Parameter.Outdir;
-                if (string.IsNullOrEmpty((this.Parameter.Outdir)))
-                {
-                    path = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs", "txt2img-samples"); ;
-                }
 
                 // テキストファイル出力（新規作成）
                 using (StreamWriter sw = new StreamWriter(Path.Combine(path, $"{DateTime.Today.ToString("yyyy-MM-dd")}.txt"), true))
@@ -611,6 +619,17 @@ namespace PromptMaker.ViewModels
 
                 // コマンドの実行処理
                 this.Parameter.CommandExecute();
+
+                if (this.Parameter.ScriptType == ScriptTypeEnum.Inpaint)
+                {
+                    string outdir_path = Path.Combine(this.Parameter.Outdir, "samples");
+
+                    // ファイルの移動（同じ名前のファイルがある場合は上書き）
+                    File.Move(Path.Combine(this.Parameter.Outdir, "example.png"), Path.Combine(this.Parameter.Outdir, "samples", $"example-{DateTime.Now.ToString("HHmmss")}.png"), true);
+
+
+                    //example.png
+                }
 
                 // イメージリストの更新
                 RefreshImageList();
