@@ -58,11 +58,11 @@ namespace PromptMaker.Common
         /// </summary>
         /// <param name="element"></param>
         /// <param name="filePath"></param>
-        public static void SaveCanvas(UIElement element, String filePath)
+        public static void SaveCanvas(InkCanvas element, String filePath)
         {
-            var bounds = VisualTreeHelper.GetDescendantBounds(element);
-            var width = (int)bounds.Width;
-            var height = (int)bounds.Height;
+            //var bounds = VisualTreeHelper.GetDescendantBounds(element);
+            var width = (int)element.ActualWidth;
+            var height = (int)element.ActualHeight;
 
             // 描画先
             var drawingVisual = new DrawingVisual();
