@@ -214,7 +214,7 @@
                                 </Grid>
                                 <Grid Grid.Row="1">
                                     <Image x:Name="image" Grid.Row="1" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
-                                    <InkCanvas x:Name="inkCanvas" Grid.Row="1" Background="{x:Null}" 
+                                    <InkCanvas Margin="5" x:Name="inkCanvas" Grid.Row="1" Background="{x:Null}" 
                                             Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
                                             Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}">
                                         <InkCanvas.DefaultDrawingAttributes>

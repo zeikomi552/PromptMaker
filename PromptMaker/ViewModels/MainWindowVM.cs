@@ -28,6 +28,9 @@ using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
+using static System.Net.WebRequestMethods;
+using System.Text.RegularExpressions;
+using File = System.IO.File;
 
 namespace PromptMaker.ViewModels
 {
@@ -436,6 +439,10 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region GFPGANの実行処理
+        /// <summary>
+        /// GFPGANの実行処理
+        /// </summary>
         public void ExecuteGFPGAN()
         {
             try
@@ -449,6 +456,7 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
 
         #region ファイル削除処理
@@ -622,13 +630,9 @@ namespace PromptMaker.ViewModels
 
                 if (this.Parameter.ScriptType == ScriptTypeEnum.Inpaint)
                 {
-                    string outdir_path = Path.Combine(this.Parameter.Outdir, "samples");
-
+                    int no = LastSampleFileNo();
                     // ファイルの移動（同じ名前のファイルがある場合は上書き）
-                    File.Move(Path.Combine(this.Parameter.Outdir, "example.png"), Path.Combine(this.Parameter.Outdir, "samples", $"example-{DateTime.Now.ToString("HHmmss")}.png"), true);
-
-
-                    //example.png
+                    File.Move(Path.Combine(this.Parameter.Outdir, "example.png"), Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png"), true);
                 }
 
                 // イメージリストの更新
@@ -637,6 +641,30 @@ namespace PromptMaker.ViewModels
             catch (Exception ex)
             {
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region 00000.pngの最後のファイル番号を取得する
+        /// <summary>
+        /// 00000.pngの最後のファイル番号を取得する
+        /// </summary>
+        /// <returns>ファイル番号</returns>
+        private int LastSampleFileNo()
+        {
+            string outdir_path = Path.Combine(this.Parameter.Outdir, "samples");
+            var reg = new Regex("\\\\[0-9]{5}.png");
+            var filepath = Directory.GetFiles(outdir_path).Where(f => reg.IsMatch(f)).OrderByDescending(n => n).ToArray().FirstOrDefault();
+            var filename = filepath != null ? filepath.Split("\\").Last() : string.Empty;
+
+            if (string.IsNullOrEmpty(filename))
+            {
+                return 0;
+            }
+            else
+            {
+                var filenameNotEx = int.Parse(filename.Replace(".png", ""));
+                return filenameNotEx;
             }
         }
         #endregion

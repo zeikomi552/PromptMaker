@@ -690,16 +690,14 @@ namespace PromptMaker.Models
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/img2img.py");
                 command.AppendLine($"--prompt \"{this.Prompt}\"");
-                //command.AppendLine($"--plms");
                 command.AppendLine($"--init-img");
                 command.AppendLine($"{this.InitFilePath}");
                 command.AppendLine($"--n_iter {N_iter}");
-
                 command.AppendLine($"--strength {this.Strength}");
                 command.AppendLine($"--n_sample {this.N_Sample}");
                 command.AppendLine($"--scale {this.Guidance_Scale}");
                 command.AppendLine($"--outdir {this.Outdir}");
-                command.AppendLine(this.UsePlms ? "--plms" : "");
+                //command.AppendLine(this.UsePlms ? "--plms" : "");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
 
