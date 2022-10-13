@@ -330,18 +330,12 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                var tmp = sender as MenuItem;
-                if (tmp != null)
+                // ファイルが選択されていてファイルパスが存在する場合
+                if (!string.IsNullOrEmpty(this.ImagePath) && File.Exists(this.ImagePath))
                 {
-                    var file_info = tmp.DataContext as FileInfo;
-
-                    if (file_info != null)
-                    {
-                        string str = Path.GetDirectoryName(file_info.FullName)!;
-                        Process.Start("explorer.exe", string.Format(@"/select,""{0}", file_info.FullName)); // エクスプローラを開く
-                    }
+                    string str = Path.GetDirectoryName(this.ImagePath)!;
+                    Process.Start("explorer.exe", string.Format(@"/select,""{0}", this.ImagePath)); // エクスプローラを開く
                 }
-
             }
             catch (Exception ex)
             {
@@ -360,30 +354,25 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                var tmp = sender as MenuItem;
-                if (tmp != null)
+                // ファイルが選択されていてファイルパスが存在する場合
+                if (!string.IsNullOrEmpty(this.ImagePath) && File.Exists(this.ImagePath))
                 {
-                    var file_info = tmp.DataContext as FileInfo;
-
-                    if (file_info != null)
-                    {
-                        Process.Start("mspaint", file_info.FullName); // 指定したフォルダを開く
-                    }
+                    Process.Start("mspaint", this.ImagePath); // 指定したファイルを開く
                 }
-
             }
             catch (Exception ex)
             {
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+       
         #endregion
 
         #region RealESRGANの保存先を開くダイアログ
         /// <summary>
         /// RealESRGANの保存先を開くダイアログ
         /// </summary>
-        public void SaveFilePathOpen()
+        public void ExecuteRealESRGAN()
         {
             try
             {
@@ -407,7 +396,7 @@ namespace PromptMaker.ViewModels
                         int no = LastSampleFileNo();
                         string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
 
-                        sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{this.ImagePathList.SelectedItem}\" -o \"{filepath}\"");
+                        sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{this.ImagePath}\" -o \"{filepath}\"");
                     }
                 }
 
@@ -436,12 +425,12 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                var path = this.ImagePathList.SelectedItem;
+                var path = this.ImagePath;
                 int no = LastSampleFileNo();
                 string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
 
                 // GFPGANの実行
-                GfpGanM.Execute(this.SettingConf.Item.GFPGANPyPath, path.FullName, filepath);
+                GfpGanM.Execute(this.SettingConf.Item.GFPGANPyPath, path, filepath);
 
                 // イメージリストの更新
                 RefreshImageList();
@@ -501,7 +490,7 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                this.Parameter.SetInitFile(this.ImagePathList.SelectedItem.FullName);
+                this.Parameter.SetInitFile(this.ImagePath);
             }
             catch (Exception ex)
             {
