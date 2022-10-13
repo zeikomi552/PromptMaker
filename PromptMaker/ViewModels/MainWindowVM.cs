@@ -387,49 +387,38 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                // ダイアログのインスタンスを生成
-                var dialog = new SaveFileDialog();
-
-                // ファイルの種類を設定
-                dialog.Filter = "PNGファイル (*.png)|*.png";
-
-                // 実行ファイルの存在確認
-                if(!File.Exists(this.SettingConf.Item.RealEsrganExePath))
+                var myProcess = new Process
                 {
-                    ShowMessage.ShowNoticeOK("Real-ESRGANの実行ファイルが見つかりませんでした。\r\n設定画面からReal-ESRGANのパス設定をしてください", "通知");
-                    return;
-                }
-
-                // ダイアログを表示する
-                if (dialog.ShowDialog() == true)
-                {
-                    var myProcess = new Process
+                    StartInfo = new ProcessStartInfo()
                     {
-                        StartInfo = new ProcessStartInfo()
-                        {
-                            FileName = "cmd.exe",
-                            RedirectStandardInput = true,
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            WorkingDirectory = this.SettingConf.Item.CurrentDir
-                        }
-                    };
-
-                    myProcess.Start();
-                    using (var sw = myProcess.StandardInput)
-                    {
-                        if (sw.BaseStream.CanWrite)
-                        {
-                            sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{this.ImagePathList.SelectedItem}\" -o \"{dialog.FileName}\"");
-                        }
+                        FileName = "cmd.exe",
+                        RedirectStandardInput = true,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        WorkingDirectory = this.SettingConf.Item.CurrentDir
                     }
+                };
 
-                    StreamReader myStreamReader = myProcess.StandardOutput;
+                myProcess.Start();
+                using (var sw = myProcess.StandardInput)
+                {
+                    if (sw.BaseStream.CanWrite)
+                    {
+                        int no = LastSampleFileNo();
+                        string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
 
-                    string? myString = myStreamReader.ReadLine();
-                    myProcess.WaitForExit();
-                    myProcess.Close();
+                        sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{this.ImagePathList.SelectedItem}\" -o \"{filepath}\"");
+                    }
                 }
+
+                StreamReader myStreamReader = myProcess.StandardOutput;
+
+                string? myString = myStreamReader.ReadLine();
+                myProcess.WaitForExit();
+                myProcess.Close();
+
+                // イメージリストの更新
+                RefreshImageList();
 
             }
             catch (Exception ex)
@@ -448,8 +437,14 @@ namespace PromptMaker.ViewModels
             try
             {
                 var path = this.ImagePathList.SelectedItem;
-                GfpGanM.Execute(this.SettingConf.Item.GFPGANPyPath, path.FullName, this.Parameter.Outdir);
+                int no = LastSampleFileNo();
+                string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
 
+                // GFPGANの実行
+                GfpGanM.Execute(this.SettingConf.Item.GFPGANPyPath, path.FullName, filepath);
+
+                // イメージリストの更新
+                RefreshImageList();
             }
             catch (Exception ex)
             {

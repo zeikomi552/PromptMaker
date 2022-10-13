@@ -7,6 +7,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace PromptMaker.Models
 {
@@ -18,9 +20,9 @@ namespace PromptMaker.Models
         /// </summary>
         /// <param name="inference_gfpgan_path">スクリプトファイル</param>
         /// <param name="inputfile">入力ファイル</param>
-        /// <param name="outdir">出力先ディレクトリ</param>
+        /// <param name="outfilename">出力先ファイル名</param>
         /// <returns>true:成功 false:失敗</returns>
-        public static bool Execute(string inference_gfpgan_path, string inputfile, string outdir)
+        public static bool Execute(string inference_gfpgan_path, string inputfile, string outfilename)
         {
             try
             {
@@ -70,7 +72,7 @@ namespace PromptMaker.Models
                     {
                         // Vital to activate Anaconda
                         sw.WriteLine(@"C:\ProgramData\Anaconda3\Scripts\activate.bat");
-                        sw.WriteLine($"python {inference_gfpgan_path} -i \"{tempDir}\" -o \"{outdir}\" -v 1.3 -s 2");
+                        sw.WriteLine($"python {inference_gfpgan_path} -i \"{tempDir}\" -o \"{tempDir}\" -v 1.3 -s 2");
                     }
                 }
 
@@ -81,7 +83,26 @@ namespace PromptMaker.Models
                 string output = myProcess.StandardOutput.ReadToEnd(); // 標準出力の読み取り
                 myProcess.Close();
 
-                return true;
+                // ディレクトリ直下のすべてのファイル一覧を取得する
+                var file = Directory.GetFiles(Path.Combine(tempDir, "restored_imgs")).LastOrDefault();
+
+                if (!string.IsNullOrEmpty(file))
+                {
+                    // ファイルのコピー（同じ名前のファイルがある場合は上書き）
+                    File.Move(file, outfilename, true);
+
+                    // DirectoryInfoのインスタンスを生成する
+                    DirectoryInfo di = new DirectoryInfo(tempDir);
+
+                    // 元のディレクトリを削除する
+                    di.Delete(true);
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch (Exception e)
             {
