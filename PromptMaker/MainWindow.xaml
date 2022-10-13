@@ -17,6 +17,7 @@
         <Converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
         <Converters:FileFullName2FileNameConverter x:Key="FileFullName2FileNameConverter"/>
         <Converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         <ViewModels:MainWindowVM x:Key="vm"/>
     </mah:MetroWindow.Resources>
     <mah:MetroWindow.DataContext>
@@ -60,32 +61,35 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="タイプ:"/>
-                        <ComboBox Margin="5" Width="100" ItemsSource="{Binding ScriptTypeEnumEx}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding Parameter.ScriptType}" Grid.Column="0"/>
-                        <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="繰り返し:"/>
-                        <TextBox TextAlignment="Center" Margin="5" Width="100" Text="{Binding Parameter.Repeat}" Grid.Column="0"/>
-                    </StackPanel>
-
-                    <Grid>
+                    <Grid Visibility="{Binding Parameter.InpaintF, Converter={StaticResource InverseBooleanConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Width="60" TextAlignment="Right" VerticalAlignment="Center" Margin="5" Text="Prompt:"/>
-                        <TextBox Height="50" Grid.Column="1" Margin="5" VerticalAlignment="Center" AcceptsReturn="True" Text="{Binding Parameter.Prompt}" VerticalScrollBarVisibility="Auto"/>
-                        <Button Grid.Column="2" Margin="5" Content="実行" Width="100">
+                        <TextBlock Width="60" TextAlignment="Right" VerticalAlignment="Center" Margin="5" Text="Prompt"/>
+                        <TextBlock VerticalAlignment="Center" Grid.Column="1" Margin="5" Text=":"/>
+                        <TextBox Height="50" Grid.Column="2" Margin="5" VerticalAlignment="Center" AcceptsReturn="True" Text="{Binding Parameter.Prompt}" VerticalScrollBarVisibility="Auto"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="タイプ"/>
+                        <TextBlock VerticalAlignment="Center" Grid.Column="1" Margin="5" Text=":"/>
+                        <ComboBox Margin="5" Width="100" ItemsSource="{Binding ScriptTypeEnumEx}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding Parameter.ScriptType}" Grid.Column="0"/>
+                        <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="繰り返し"/>
+                        <TextBlock VerticalAlignment="Center" Grid.Column="1" Margin="5" Text=":"/>
+                        <TextBox TextAlignment="Center" Margin="5" Width="100" Text="{Binding Parameter.Repeat}" Grid.Column="0"/>
+                        <Button HorizontalAlignment="Left" Grid.Column="2" Margin="5" Content="実行" Width="100" Cursor="Hand">
                             <b:Interaction.Triggers>
                                 <b:EventTrigger EventName="Click">
                                     <b:CallMethodAction TargetObject="{Binding}" MethodName="Execute"/>
                                 </b:EventTrigger>
                             </b:Interaction.Triggers>
                         </Button>
-                    </Grid>
+                    </StackPanel>
                 </StackPanel>
 
                 <Grid Grid.Row="1">
@@ -97,7 +101,7 @@
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="300"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
@@ -167,25 +171,13 @@
                             </Grid>
                         </GroupBox>
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
-                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">
-                            <GroupBox.Style>
-                                <Style TargetType="GroupBox">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Parameter.Img2ImgF}" Value="true">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Parameter.Txt2ImgF}" Value="true">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Parameter.InpaintF}" Value="true">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </GroupBox.Style>
+                        <GridSplitter Background="AliceBlue" Width="3" Grid.Column="2" HorizontalAlignment="Right"/>
+
+                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">
                             <Grid MinWidth="200">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
@@ -212,7 +204,7 @@
                                         </b:Interaction.Triggers>
                                     </Button>
                                 </Grid>
-                                <Grid Grid.Row="1">
+                                <Grid Grid.Row="2">
                                     <Image x:Name="image" Grid.Row="1" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
                                     <InkCanvas Margin="5" x:Name="inkCanvas" Grid.Row="1" Background="{x:Null}" 
                                             Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
@@ -242,105 +234,11 @@
 
                         <GroupBox Grid.Column="2" Margin="5,5,5,5" Header="アウトプット">
                             <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="auto"/>
-                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
                                 <Image Margin="5,5,5,5" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
-                                <ListView ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="1"
-                                          ItemsSource="{Binding ImagePathList.Items}" 
-                                          SelectedItem="{Binding ImagePathList.SelectedItem}">
-                                    <b:Interaction.Triggers>
-                                        <b:EventTrigger EventName="SelectionChanged">
-                                            <b:CallMethodAction TargetObject="{Binding}" MethodName="ImagePathSelectionChanged"/>
-                                        </b:EventTrigger>
-                                    </b:Interaction.Triggers>
-                                    <ListView.Template>
-                                        <ControlTemplate TargetType="{x:Type ListView}">
-                                            <Border BorderThickness="5">
-                                                <ScrollViewer>
-                                                    <ItemsPresenter Margin="5" />
-                                                </ScrollViewer>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </ListView.Template>
-                                    <ListView.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ListView.ItemsPanel>
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                                <Image Width="100" Source="{Binding FullName, Converter={StaticResource StringToImageSourceConverter}}" >
-                                                    <Image.ContextMenu>
-                                                        <ContextMenu>
-                                                            <MenuItem Header="フォルダを開く">
-                                                                <b:Interaction.Triggers>
-                                                                    <b:EventTrigger EventName="Click">
-                                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FolderOpen"/>
-                                                                    </b:EventTrigger>
-                                                                </b:Interaction.Triggers>
-                                                            </MenuItem>
-                                                            <MenuItem Header="ファイルを開く">
-                                                                <b:Interaction.Triggers>
-                                                                    <b:EventTrigger EventName="Click">
-                                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FileOpen"/>
-                                                                    </b:EventTrigger>
-                                                                </b:Interaction.Triggers>
-                                                            </MenuItem>
-                                                            <MenuItem Header="高画質化(Real-ESRGAN)">
-                                                                <b:Interaction.Triggers>
-                                                                    <b:EventTrigger EventName="Click">
-                                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="SaveFilePathOpen"/>
-                                                                    </b:EventTrigger>
-                                                                </b:Interaction.Triggers>
-                                                            </MenuItem>
-                                                            <MenuItem Header="高画質化(GFPGAN)">
-                                                                <b:Interaction.Triggers>
-                                                                    <b:EventTrigger EventName="Click">
-                                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="ExecuteGFPGAN"/>
-                                                                    </b:EventTrigger>
-                                                                </b:Interaction.Triggers>
-                                                            </MenuItem>
-                                                            <MenuItem Header="Img2Imgフォルダへ">
-                                                                <b:Interaction.Triggers>
-                                                                    <b:EventTrigger EventName="Click">
-                                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="MoveImg2Img"/>
-                                                                    </b:EventTrigger>
-                                                                </b:Interaction.Triggers>
-                                                                <MenuItem.Style>
-                                                                    <Style TargetType="MenuItem">
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding Parameter.Img2ImgF, Source={StaticResource vm}}" Value="true">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding Parameter.Txt2ImgF, Source={StaticResource vm}}" Value="true">
-                                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding Parameter.InpaintF, Source={StaticResource vm}}" Value="true">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </MenuItem.Style>
-                                                            </MenuItem>
-                                                            <MenuItem Header="ファイルをゴミ箱へ">
-                                                                <b:Interaction.Triggers>
-                                                                    <b:EventTrigger EventName="Click">
-                                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FileDelete"/>
-                                                                    </b:EventTrigger>
-                                                                </b:Interaction.Triggers>
-                                                            </MenuItem>
-                                                        </ContextMenu>
-                                                    </Image.ContextMenu>
-                                                </Image>
-                                                <TextBlock HorizontalAlignment="Center" Text="{Binding FullName, Converter={StaticResource FileFullName2FileNameConverter}}"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-
-                                </ListView>
                             </Grid>
                         </GroupBox>
 
@@ -454,6 +352,102 @@
                         </GroupBox>
                     </Grid>
                 </Grid>
+
+                <ListView Height="auto" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="2"
+                                          ItemsSource="{Binding ImagePathList.Items}" 
+                                          SelectedItem="{Binding ImagePathList.SelectedItem}">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="SelectionChanged">
+                            <b:CallMethodAction TargetObject="{Binding}" MethodName="ImagePathSelectionChanged"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <ListView.Template>
+                        <ControlTemplate TargetType="{x:Type ListView}">
+                            <Border BorderThickness="5">
+                                <ScrollViewer>
+                                    <ItemsPresenter Margin="5" />
+                                </ScrollViewer>
+                            </Border>
+                        </ControlTemplate>
+                    </ListView.Template>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <Image Width="100" Source="{Binding FullName, Converter={StaticResource StringToImageSourceConverter}}" >
+                                    <Image.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="フォルダを開く">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FolderOpen"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                            </MenuItem>
+                                            <MenuItem Header="ファイルを開く">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FileOpen"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                            </MenuItem>
+                                            <MenuItem Header="高画質化(Real-ESRGAN)">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="SaveFilePathOpen"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                            </MenuItem>
+                                            <MenuItem Header="高画質化(GFPGAN)">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="ExecuteGFPGAN"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                            </MenuItem>
+                                            <MenuItem Header="Img2Imgフォルダへ">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="MoveImg2Img"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                                <MenuItem.Style>
+                                                    <Style TargetType="MenuItem">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Parameter.Img2ImgF, Source={StaticResource vm}}" Value="true">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Parameter.Txt2ImgF, Source={StaticResource vm}}" Value="true">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Parameter.InpaintF, Source={StaticResource vm}}" Value="true">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </MenuItem.Style>
+                                            </MenuItem>
+                                            <MenuItem Header="ファイルをゴミ箱へ">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FileDelete"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </Image.ContextMenu>
+                                </Image>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding FullName, Converter={StaticResource FileFullName2FileNameConverter}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+
+                </ListView>
+
             </Grid>
         </DockPanel>
 
