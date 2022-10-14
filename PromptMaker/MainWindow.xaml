@@ -12,7 +12,7 @@
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:ViewModels="clr-namespace:PromptMaker.ViewModels" x:Class="PromptMaker.MainWindow"
         xmlns:Converters="clr-namespace:PromptMaker.Common.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1200" Width="1400">
+        Title="プロンプトメーカー" Height="1200" Width="1400">
     <mah:MetroWindow.Resources>
         <Converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
         <Converters:FileFullName2FileNameConverter x:Key="FileFullName2FileNameConverter"/>
@@ -69,10 +69,26 @@
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Width="60" TextAlignment="Right" VerticalAlignment="Center" Margin="5" Text="Prompt"/>
                         <TextBlock VerticalAlignment="Center" Grid.Column="1" Margin="5" Text=":"/>
                         <TextBox Height="50" Grid.Column="2" Margin="5" VerticalAlignment="Center" AcceptsReturn="True" Text="{Binding Parameter.Prompt}" VerticalScrollBarVisibility="Auto"/>
+                        <Button Margin="5" Content="プロンプト作成" Grid.Column="3" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenPromptMaker"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                        <Button Margin="5" Content="補助リストに追加" Grid.Column="4" Cursor="Hand">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="AddList"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
                     </Grid>
 
                     <StackPanel Orientation="Horizontal">
@@ -100,7 +116,7 @@
 
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="300"/>
+                            <ColumnDefinition Width="380"/>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="auto"/>
@@ -109,51 +125,12 @@
                         <GroupBox Margin="5" Header="プロンプト補助リスト">
                             <Grid>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="auto"/>
                                 </Grid.RowDefinitions>
-                                <DataGrid AutoGenerateColumns="False" Margin="5,5,5,5"
-                                      SelectedItem="{Binding PromptComposerConf.Item.SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      CanUserDeleteRows="True" ItemsSource="{Binding PromptComposerConf.Item.Items}">
-                                    <DataGrid.Columns>
-                                        <DataGridCheckBoxColumn Header="有効" Binding="{Binding IsEnable}"/>
-                                        <DataGridTextColumn Header="説明" Binding="{Binding Description}"/>
-                                        <DataGridTextColumn Width="150" Header="プロンプト" Binding="{Binding Prompt}"/>
-                                        <DataGridTextColumn Width="150" Header="URL" Binding="{Binding URL}"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                                <Grid Margin="5" Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button Margin="5" Grid.Column="1" Content="↑">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding PromptComposerConf.Item}" MethodName="MoveUP"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                    <Button Margin="5" Grid.Column="2" Content="-">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding PromptComposerConf.Item}" MethodName="SelectedItemDelete"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                    <Button Margin="5" Grid.Column="3" Content="↓">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding PromptComposerConf.Item}" MethodName="MoveDown"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                </Grid>
-                                <StackPanel HorizontalAlignment="Center" Grid.Row="2" Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
                                     <Button Margin="5" Content="保存">
                                         <b:Interaction.Triggers>
                                             <b:EventTrigger EventName="Click">
@@ -168,21 +145,63 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
-                                    <Button Margin="5" Content="URL">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="MoveURL"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                    <Button Margin="5" Content="メーカー">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenPromptMaker"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
                                 </StackPanel>
+
+                                <DataGrid Grid.Row="1" AutoGenerateColumns="False" Margin="5,5,5,5"
+                                      SelectedItem="{Binding PromptComposerConf.Item.SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      CanUserDeleteRows="True" ItemsSource="{Binding PromptComposerConf.Item.Items}">
+                                    <DataGrid.Columns>
+                                        <DataGridCheckBoxColumn Header="有効" Binding="{Binding IsEnable}"/>
+                                        <DataGridTextColumn Header="説明" Binding="{Binding Description}"/>
+                                        <DataGridTextColumn Width="150" Header="プロンプト" Binding="{Binding Prompt}"/>
+                                        <DataGridTextColumn Width="150" Header="URL" Binding="{Binding URL}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                
+                                <Grid Margin="5" Grid.Row="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Margin="5" Grid.Column="1" Content="↑">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding PromptComposerConf.Item}" MethodName="MoveUP"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Margin="5" Grid.Column="2" Content="-">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding PromptComposerConf.Item}" MethodName="SelectedItemDelete"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Margin="5" Grid.Column="3" Content="↓">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding PromptComposerConf.Item}" MethodName="MoveDown"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Margin="5" Content="確認" Cursor="Hand">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="MoveURL"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Content="プロンプトへ" Cursor="Hand">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="SetPrompt"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
                             </Grid>
                         </GroupBox>
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
@@ -247,52 +266,54 @@
                             </Grid>
                         </GroupBox>
 
-                        <GroupBox Grid.Column="2" Margin="5,5,5,5" Header="アウトプット">
+                        <GroupBox MinWidth="100" Grid.Column="2" Margin="5,5,5,5" Header="アウトプット">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Margin="5" Grid.Column="1" Content="ファイル" Width="100">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="FileOpen"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                    <Button Margin="5" Grid.Column="1" Content="フォルダ" Width="100">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="FolderOpen"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                    <Button Margin="5" Grid.Column="1" Content="ESRGAN" Width="100">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="ExecuteRealESRGAN"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                    <Button Margin="5" Grid.Column="2" Content="GFPGAN" Width="100">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="ExecuteGFPGAN"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                    <Button Margin="5" Grid.Column="2" Content="インプット" Width="100" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}" Cursor="Hand">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="MoveImg2Img"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
-                                </StackPanel>
-                                <Image Grid.Row="2" Margin="5,5,5,5" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Margin="5" Grid.Column="1" Content="ファイル" Width="100">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="FileOpen"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Margin="5" Grid.Column="1" Content="フォルダ" Width="100">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="FolderOpen"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Margin="5" Grid.Column="1" Content="ESRGAN" Width="100">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="ExecuteRealESRGAN"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Margin="5" Grid.Column="2" Content="GFPGAN" Width="100">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="ExecuteGFPGAN"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                        <Button Margin="5" Grid.Column="2" Content="インプット" Width="100" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}" Cursor="Hand">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="Click">
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="MoveImg2Img"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Row="1">
+                                    <Image Margin="5,5,5,5" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                </Grid>
                             </Grid>
                         </GroupBox>
 
@@ -394,12 +415,6 @@
                                         <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                         <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.HugeSizeF}"/>
                                     </StackPanel>
-                                    <!--<StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="ファイル出力時にフォルダ名とファイル名接頭辞に使用する"
-                                                   TextAlignment="Right" Width="80" Text="プレフィックス" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBox Width="150" Text="{Binding Parameter.Prefix}"/>
-                                    </StackPanel>-->
                                 </StackPanel>
                             </Grid>
 
@@ -407,7 +422,7 @@
                     </Grid>
                 </Grid>
 
-                <ListView Height="auto" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="2"
+                <ListView Height="150" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="2"
                                           ItemsSource="{Binding ImagePathList.Items}" 
                                           SelectedItem="{Binding ImagePathList.SelectedItem}">
                     <b:Interaction.Triggers>

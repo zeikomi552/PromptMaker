@@ -31,6 +31,7 @@ using Application = System.Windows.Application;
 using static System.Net.WebRequestMethods;
 using System.Text.RegularExpressions;
 using File = System.IO.File;
+using System.Security.Cryptography;
 
 namespace PromptMaker.ViewModels
 {
@@ -805,6 +806,54 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
+
+        #region プロンプトへセット
+        /// <summary>
+        /// プロンプトへセット
+        /// </summary>
+        public void SetPrompt()
+        {
+            try
+            {
+                if (this.PromptComposerConf.Item != null && this.PromptComposerConf.Item.SelectedItem != null)
+                {
+                    this.Parameter.Prompt = this.PromptComposerConf.Item.SelectedItem.Prompt;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        public void AddList()
+        {
+            try
+            {
+                if (this.PromptComposerConf.Item != null)
+                {
+                    var exsist_f = (from x in this.PromptComposerConf.Item.Items
+                               where x.Prompt.Equals(this.Parameter.Prompt)
+                               select x).Any();
+
+                    if(!exsist_f)
+                    {
+                        this.PromptComposerConf.Item.Items.Add(new PromptConsistM()
+                        {
+                            Prompt = this.Parameter.Prompt,
+                            Description = "Dummy",
+                            IsEnable = false                           
+                        });
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
 
         #region 閉じる
         /// <summary>
