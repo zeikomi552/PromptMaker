@@ -333,15 +333,23 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region 閉じる処理
+        /// <summary>
+        /// 閉じる処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public override void Close(object sender, EventArgs e)
         {
             try
             {
+                this.DialogResult = true;
             }
             catch (Exception ex)
             {
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
     }
 }
