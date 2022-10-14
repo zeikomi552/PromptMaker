@@ -689,6 +689,46 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region URLへ移動
+        /// <summary>
+        /// URLへ移動
+        /// </summary>
+        public void MoveURL()
+        {
+            try
+            {
+                if (this.PromptComposerConf != null && this.PromptComposerConf.Item.SelectedItem != null)
+                {
+                    string url = string.Empty;
+                    // URLが設定されている
+                    if (!string.IsNullOrEmpty(this.PromptComposerConf.Item.SelectedItem.URL))
+                    {
+                        url = this.PromptComposerConf.Item.SelectedItem.URL;
+                    }
+                    // URLが未設定
+                    else
+                    {
+                        url = $"https://lexica.art/?q={this.PromptComposerConf.Item.SelectedItem.Prompt}";
+                    }
+
+
+                    ProcessStartInfo pi = new ProcessStartInfo()
+                    {
+                        FileName = url,
+                        UseShellExecute = true,
+                    };
+
+                    Process.Start(pi);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
         #region 出力先ディレクトリを選択する
         /// <summary>
         /// 出力先ディレクトリを選択する

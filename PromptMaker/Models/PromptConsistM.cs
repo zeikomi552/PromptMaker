@@ -83,5 +83,32 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        #region URL[URL]プロパティ
+        /// <summary>
+        /// URL[URL]プロパティ用変数
+        /// </summary>
+        string _URL = string.Empty;
+        /// <summary>
+        /// URL[URL]プロパティ
+        /// </summary>
+        public string URL
+        {
+            get
+            {
+                return _URL;
+            }
+            set
+            {
+                if (_URL == null || !_URL.Equals(value))
+                {
+                    _URL = value;
+                    NotifyPropertyChanged("URL");
+                }
+            }
+        }
+        #endregion
+
+
     }
 }

@@ -118,8 +118,9 @@
                                       CanUserDeleteRows="True" ItemsSource="{Binding PromptComposerConf.Item.Items}">
                                     <DataGrid.Columns>
                                         <DataGridCheckBoxColumn Header="有効" Binding="{Binding IsEnable}"/>
-                                        <DataGridTextColumn Width="150" Header="プロンプト" Binding="{Binding Prompt}"/>
                                         <DataGridTextColumn Header="説明" Binding="{Binding Description}"/>
+                                        <DataGridTextColumn Width="150" Header="プロンプト" Binding="{Binding Prompt}"/>
+                                        <DataGridTextColumn Width="150" Header="URL" Binding="{Binding URL}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                                 <Grid Margin="5" Grid.Row="1">
@@ -164,6 +165,13 @@
                                         <b:Interaction.Triggers>
                                             <b:EventTrigger EventName="Click">
                                                 <b:CallMethodAction TargetObject="{Binding}" MethodName="LoadPromptList"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Content="URL">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="MoveURL"/>
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
