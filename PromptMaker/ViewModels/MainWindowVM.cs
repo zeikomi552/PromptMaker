@@ -729,6 +729,30 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region プロンプトメーカーの起動
+        /// <summary>
+        /// プロンプトメーカーの起動
+        /// </summary>
+        public void OpenPromptMaker()
+        {
+            try
+            {
+                var wnd = new PromptMakerV();
+                var vm = wnd.DataContext as PromptMakerVM;
+
+                if (vm != null)
+                {
+                    vm.PromptComposerConf = this.PromptComposerConf;
+                    wnd.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");   
+            }
+        }
+        #endregion
+
         #region 出力先ディレクトリを選択する
         /// <summary>
         /// 出力先ディレクトリを選択する

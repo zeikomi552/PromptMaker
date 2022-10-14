@@ -104,7 +104,7 @@ namespace PromptMaker.Models
                     return false;
                 }
             }
-            catch (Exception e)
+            catch
             {
                 throw;
             }

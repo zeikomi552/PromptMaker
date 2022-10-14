@@ -175,6 +175,13 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
+                                    <Button Margin="5" Content="メーカー">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenPromptMaker"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
                                 </StackPanel>
                             </Grid>
                         </GroupBox>
