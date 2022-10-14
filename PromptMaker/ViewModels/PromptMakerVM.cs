@@ -211,6 +211,27 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region PromptからLexicaを検索する
+        /// <summary>
+        /// PromptからLexicaを検索する
+        /// </summary>
+        public void LexicaSearchFromPrompt()
+        {
+            try
+            {
+                if (this.PhreseList != null && this.PhreseList.SelectedItem != null)
+                {
+                    string url = $"https://lexica.art/?q={this.Prompt}";
+                    MoveURL(url);
+                }
+            }
+            catch (Exception e)
+            {
+                ShowMessage.ShowErrorOK(e.Message, "Error");
+            }
+        }
+        #endregion
+
         #region URLの移動処理
         /// <summary>
         /// URLの移動処理
@@ -259,6 +280,32 @@ namespace PromptMaker.ViewModels
                         {
                             this.Prompt += ", " + this.PhreseList.SelectedItem.Phrase;
                         }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ShowMessage.ShowErrorOK(e.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region プロンプトの除去
+        /// <summary>
+        /// プロンプトの除去
+        /// </summary>
+        public void PromptDel()
+        {
+            try
+            {
+                // nullチェック
+                if (this.PhreseList != null && this.PhreseList.SelectedItem != null)
+                {
+                    // 追加されている場合
+                    if (this.Prompt.Contains(this.PhreseList.SelectedItem.Phrase))
+                    {
+                        this.Prompt = this.Prompt.Replace(", " + this.PhreseList.SelectedItem.Phrase, "");    // 消す
+                        this.Prompt = this.Prompt.Replace(this.PhreseList.SelectedItem.Phrase, "");           // 消す
                     }
                 }
             }
