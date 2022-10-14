@@ -740,10 +740,17 @@ namespace PromptMaker.ViewModels
                 var wnd = new PromptMakerV();
                 var vm = wnd.DataContext as PromptMakerVM;
 
+                // nullチェック
                 if (vm != null)
                 {
-                    vm.PromptComposerConf = this.PromptComposerConf;
-                    wnd.ShowDialog();
+                    vm.PromptComposerConf = this.PromptComposerConf;    // プロンプトリストのセット
+                    vm.Prompt = this.Parameter.Prompt;                  // プロンプトのセット
+
+                    // プロンプトメーカー表示
+                    if (wnd.ShowDialog() == true)
+                    {
+                        this.Parameter.Prompt = vm.Prompt;  // プロンプトの反映
+                    }
                 }
             }
             catch (Exception ex)
