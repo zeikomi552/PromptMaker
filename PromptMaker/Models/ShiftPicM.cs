@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Ink;
 
 namespace PromptMaker.Models
 {
@@ -35,8 +36,6 @@ namespace PromptMaker.Models
             }
         }
         #endregion
-
-
 
         #region X方向に移動した量[MoveXPos]プロパティ
         /// <summary>
@@ -87,8 +86,6 @@ namespace PromptMaker.Models
             }
         }
         #endregion
-
-
 
         #region Y方向に移動した量[MoveYPos]プロパティ
         /// <summary>
@@ -145,7 +142,7 @@ namespace PromptMaker.Models
         /// 初期化処理
         /// </summary>
         /// <param name="param">パラメータ情報</param>
-        public void Initialize( ParameterM param)
+        public void Initialize(ParameterM param)
         {
             this.Parent = param;
             this.MoveXPos = 0;
@@ -267,5 +264,24 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        public void AutoTest()
+        {
+            try
+            {
+                int max = 10;
+                for (int i = 0; i < max; i++)
+                {
+                    // 後ろへ移動
+                    ShiftBackward();
+                    ShiftRight();
+                    ShiftDown();
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
     }
 }

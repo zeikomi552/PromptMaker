@@ -16,11 +16,39 @@ using System.Windows.Shapes;
 using Path = System.IO.Path;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
+using Pen = System.Drawing.Pen;
+using Color = System.Drawing.Color;
+using System.Text.RegularExpressions;
 
 namespace PromptMaker.Common
 {
     public class Utilities
     {
+        #region 00000.pngの最後のファイル番号を取得する
+        /// <summary>
+        /// 00000.pngの最後のファイル番号を取得する
+        /// </summary>
+        /// <param name="outdir"></param>
+        /// <returns>ファイル番号</returns>
+        public static int LastSampleFileNo(string outdir)
+        {
+            string outdir_path = Path.Combine(outdir, "samples");
+            var reg = new Regex("\\\\[0-9]{5}.png");
+            var filepath = Directory.GetFiles(outdir_path).Where(f => reg.IsMatch(f)).OrderByDescending(n => n).ToArray().FirstOrDefault();
+            var filename = filepath != null ? filepath.Split("\\").Last() : string.Empty;
+
+            if (string.IsNullOrEmpty(filename))
+            {
+                return 0;
+            }
+            else
+            {
+                var filenameNotEx = int.Parse(filename.Replace(".png", ""));
+                return filenameNotEx;
+            }
+        }
+        #endregion
+
         #region 画像に文字列を埋め込んで移動する処理
         /// <summary>
         /// 画像に文字列を埋め込んで移動する処理
@@ -66,7 +94,6 @@ namespace PromptMaker.Common
         /// <param name="filePath"></param>
         public static void SaveCanvas(InkCanvas element, String filePath)
         {
-            //var bounds = VisualTreeHelper.GetDescendantBounds(element);
             var width = (int)element.ActualWidth;
             var height = (int)element.ActualHeight;
 
@@ -92,6 +119,90 @@ namespace PromptMaker.Common
             {
                 encoder.Save(fs);
             }
+        }
+        #endregion
+
+        #region Maskファイル作成処理
+        /// <summary>
+        /// Maskファイル作成処理
+        /// </summary>
+        /// <param name="path">入力ファイルパス</param>
+        /// <param name="x">ずらしたXの移動量px</param>
+        /// <param name="y">ずらしたYの移動量px</param>
+        /// <param name="z">ずらしたZの移動量px</param>
+        public static void SetMask(string path, int x, int y, int z)
+        {
+            string filename = Path.GetFileName(path);
+            string folderPath = System.IO.Path.GetDirectoryName(path)!;
+            //folderPath = Path.Combine(folderPath, keyword);
+            PathManager.CreateDirectory(folderPath);
+            string tmppath = Path.Combine(folderPath, "tmp-" + filename);
+
+            using (var bmp = new Bitmap(path))
+            using (var fs = new FileStream(tmppath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                using (var g = Graphics.FromImage(bmp))
+                {
+
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
+
+                    if (x < 0)
+                    {
+                        for (int ix = bmp.Width; ix >= bmp.Width + x; ix--)
+                        {
+                            g.DrawLine(new Pen(Color.White), new System.Drawing.Point(ix, 0), new System.Drawing.Point(ix, bmp.Height));
+                        }
+                    }
+                    else
+                    {
+                        for (int ix = 0; ix <= x; ix++)
+                        {
+                            g.DrawLine(new Pen(Color.White), new System.Drawing.Point(ix, 0), new System.Drawing.Point(ix, bmp.Height));
+                        }
+                    }
+
+                    if (y < 0)
+                    {
+                        for (int iy = bmp.Height; iy >= bmp.Height + y; iy--)
+                        {
+                            g.DrawLine(new Pen(Color.White), new System.Drawing.Point(0, iy), new System.Drawing.Point(bmp.Width, iy));
+                        }
+                    }
+                    else
+                    {
+                        for (int iy = 0; iy <= y; iy++)
+                        {
+                            g.DrawLine(new Pen(Color.White), new System.Drawing.Point(0, iy), new System.Drawing.Point(bmp.Width, iy));
+                        }
+                    }
+
+                    int tz = (z*2 - x);
+                    if (tz >= 0)
+                    {
+                        for (int iz = bmp.Width; iz >= bmp.Width - tz; iz--)
+                        {
+                            g.DrawLine(new Pen(Color.White), new System.Drawing.Point(iz, 0), new System.Drawing.Point(iz, bmp.Height));
+                        }
+                    }
+
+                    tz = (z * 2 - y);
+                    if (tz >= 0)
+                    {
+                        for (int iz = bmp.Height; iz >= bmp.Height - tz; iz--)
+                        {
+                            g.DrawLine(new Pen(Color.White), new System.Drawing.Point(0, iz), new System.Drawing.Point(bmp.Width, iz));
+                        }
+                    }
+
+                }
+
+                fs.SetLength(0);
+
+                bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+            }
+            File.Move(tmppath, path, true);
+
         }
         #endregion
 

@@ -15,11 +15,25 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
+using System.Windows.Ink;
+using System.Text.RegularExpressions;
+using System.Windows.Threading;
+using PromptMaker.ViewModels;
 
 namespace PromptMaker.Models
 {
     public class ParameterM : ModelBase
     {
+        /// <summary>
+        /// InkCanvasのストローク情報
+        /// </summary>
+        public StrokeCollection? InkCanvasStroke { get; set; }
+
+        /// <summary>
+        /// 親のビューモデル
+        /// </summary>
+        public MainWindowVM? Parent { get; set; }
+
         #region 繰り返し回数[Repeat]プロパティ
         /// <summary>
         /// 繰り返し回数[Repeat]プロパティ用変数
@@ -658,8 +672,6 @@ namespace PromptMaker.Models
         }
         #endregion
 
-
-
         Random _Rand = new Random();
 
         #region コマンド
@@ -993,5 +1005,126 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        #region コマンドの実行
+        /// <summary>
+        /// コマンドの実行
+        /// </summary>
+        public void Execute(object sender, EventArgs ev)
+        {
+            try
+            {
+                string prompt_bk = this.Prompt;
+
+                // プロンプトを改行で分割する
+                string[] prompt_list = prompt_bk.Split("\r\n");
+
+                // 親ディレクトリ
+                var parent_dir = this.Outdir;
+                var path = Path.Combine(parent_dir, this.Prefix);
+
+                // 繰り返し回数指定
+                for (int cnt = 0; cnt < this.Repeat; cnt++)
+                {
+                    // プロンプト補助リスト
+                    foreach (var composer in this.Parent!.PromptComposerConf.Item.Items)
+                    {
+                        // 有効なもののみ実行
+                        if (composer.IsEnable)
+                        {
+                            foreach (var prompt in prompt_list)
+                            {
+                                this.Prompt = prompt + " " + composer.Prompt;
+                                ExecuteSub(sender, ev);
+                            }
+                        }
+                    }
+                }
+
+                this.Prompt = prompt_bk;
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+
+
+        #region サブ関数
+        /// <summary>
+        /// サブ関数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ev"></param>
+        /// <param name="debug_f"></param>
+        /// <param name="msg"></param>
+        /// <param name="keyword">文字列挿入画像のフォルダ名とファイルプレフィスク</param>
+        private void ExecuteSub(object sender, EventArgs ev)
+        {
+            try
+            {
+                if (this.Img2ImgF && string.IsNullOrEmpty(this.InitFilePath))
+                {
+                    ShowMessage.ShowNoticeOK("img2imgはファイルパスが必須です", "通知");
+                    return;
+                }
+
+                // Inpaintingの場合のみ事前にファイルを作成する
+                if (this.InpaintF)
+                {
+                    // ファイルコピー
+                    File.Copy(this.InitFilePath, Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example.png"), true);
+
+                    var wnd = VisualTreeHelperWrapper.FindAncestor<Window>((Button)sender) as MainWindow;
+
+                    if (wnd != null)
+                    {
+                        var canvas = wnd!.inkCanvas;
+                        string filepath = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example_mask.png");
+                        Utilities.SaveCanvas(canvas, filepath);
+
+                        int x = this.ShiftPic.MoveXPos;
+                        int y = this.ShiftPic.MoveYPos;
+                        int z = this.ShiftPic.MoveZPos;
+                        Utilities.SetMask(filepath, x, y, z);
+                    }
+                }
+
+                string path = this.Outdir;
+
+                // テキストファイル出力（新規作成）
+                using (StreamWriter sw = new StreamWriter(Path.Combine(path, $"{DateTime.Today.ToString("yyyy-MM-dd")}.txt"), true))
+                {
+                    sw.WriteLine($"--------");
+                    sw.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
+                    sw.WriteLine($"Prompt->{this.Prompt}");
+                    sw.WriteLine($"Command->{this.Command}");
+                }
+
+                // コマンドの実行処理
+                this.CommandExecute();
+
+                if (this.ScriptType == ScriptTypeEnum.Inpaint)
+                {
+                    int no = Utilities.LastSampleFileNo(this.Outdir);
+                    // ファイルの移動（同じ名前のファイルがある場合は上書き）
+                    File.Move(Path.Combine(this.Outdir, "example.png"), Path.Combine(this.Outdir, "samples", $"{(no + 1).ToString("00000")}.png"), true);
+                }
+
+                // イメージリストの更新
+                this.Parent!.RefreshImageList();
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+
+
+
     }
 }

@@ -32,10 +32,11 @@ using static System.Net.WebRequestMethods;
 using System.Text.RegularExpressions;
 using File = System.IO.File;
 using System.Security.Cryptography;
+using System.Windows.Ink;
 
 namespace PromptMaker.ViewModels
 {
-    internal class MainWindowVM : ViewModelBase
+    public class MainWindowVM : ViewModelBase
     {
         #region コンストラクタ
         /// <summary>
@@ -223,11 +224,22 @@ namespace PromptMaker.ViewModels
         {
             try
             {
+                this._Parameter.Parent = this;  // 親データを保持
+
                 this.SettingConf.LoadXML();
                 this.PromptComposerConf.LoadXML();
                 this.Parameter.Outdir = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs");
 
                 this.Parameter.ShiftPic.Initialize(this.Parameter);   // パラメータの保存
+
+                var wnd = VisualTreeHelperWrapper.FindAncestor<Window>((Grid)sender) as MainWindow;
+
+                // nullチェック
+                if (wnd != null)
+                {
+                    this.Parameter.InkCanvasStroke = wnd.inkCanvas.Strokes;
+                }
+
 
                 RefreshImageList();
 
@@ -243,7 +255,7 @@ namespace PromptMaker.ViewModels
         /// <summary>
         /// イメージリストの更新
         /// </summary>
-        private void RefreshImageList()
+        public void RefreshImageList()
         {
             Task.Run(() =>
             {
@@ -399,7 +411,7 @@ namespace PromptMaker.ViewModels
                 {
                     if (sw.BaseStream.CanWrite)
                     {
-                        int no = LastSampleFileNo();
+                        int no = Utilities.LastSampleFileNo(this.Parameter.Outdir);
                         string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
 
                         sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{this.ImagePath}\" -o \"{filepath}\"");
@@ -432,7 +444,7 @@ namespace PromptMaker.ViewModels
             try
             {
                 var path = this.ImagePath;
-                int no = LastSampleFileNo();
+                int no = Utilities.LastSampleFileNo(this.Parameter.Outdir);
                 string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
 
                 // GFPGANの実行
@@ -526,138 +538,10 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-        #region コマンドの実行
-        /// <summary>
-        /// コマンドの実行
-        /// </summary>
-        public void Execute(object sender, EventArgs ev)
-        {
-            try
-            {
-                string prompt_bk = this.Parameter.Prompt;
+        
 
-                // プロンプトを改行で分割する
-                string[] prompt_list = prompt_bk.Split("\r\n");
 
-                // 親ディレクトリ
-                var parent_dir = this.Parameter.Outdir;
-                var path = Path.Combine(parent_dir, this.Parameter.Prefix);
 
-                // 繰り返し回数指定
-                for (int cnt = 0; cnt < this.Parameter.Repeat; cnt++)
-                {
-                    // プロンプト補助リスト
-                    foreach (var composer in this.PromptComposerConf.Item.Items)
-                    {
-                        // 有効なもののみ実行
-                        if (composer.IsEnable)
-                        {
-                            foreach (var prompt in prompt_list)
-                            {
-                                this.Parameter.Prompt = prompt + " " + composer.Prompt;
-                                ExecuteSub(sender, ev);
-                            }
-                        }
-                    }
-                }
-
-                this.Parameter.Prompt = prompt_bk;
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
-        #region サブ関数
-        /// <summary>
-        /// サブ関数
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="ev"></param>
-        /// <param name="debug_f"></param>
-        /// <param name="msg"></param>
-        /// <param name="keyword">文字列挿入画像のフォルダ名とファイルプレフィスク</param>
-        private void ExecuteSub(object sender, EventArgs ev)
-        {
-            try
-            {
-                if (this.Parameter.Img2ImgF && string.IsNullOrEmpty(this.Parameter.InitFilePath))
-                {
-                    ShowMessage.ShowNoticeOK("img2imgはファイルパスが必須です", "通知");
-                    return;
-                }
-
-                // Inpaintingの場合のみ事前にファイルを作成する
-                if (this.Parameter.InpaintF)
-                {
-                    // ファイルコピー
-                    File.Copy(this.Parameter.InitFilePath, Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example.png"), true);
-
-                    var wnd = VisualTreeHelperWrapper.FindAncestor<Window>((Button)sender) as MainWindow;
-
-                    if (wnd != null)
-                    {
-                        var canvas = wnd!.inkCanvas;
-                        Utilities.SaveCanvas(canvas, Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example_mask.png"));
-                    }
-                }
-
-                string path = this.Parameter.Outdir;
-
-                // テキストファイル出力（新規作成）
-                using (StreamWriter sw = new StreamWriter(Path.Combine(path, $"{DateTime.Today.ToString("yyyy-MM-dd")}.txt"), true))
-                {
-                    sw.WriteLine($"--------");
-                    sw.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
-                    sw.WriteLine($"Prompt->{this.Parameter.Prompt}");
-                    sw.WriteLine($"Command->{this.Parameter.Command}");
-                }
-
-                // コマンドの実行処理
-                this.Parameter.CommandExecute();
-
-                if (this.Parameter.ScriptType == ScriptTypeEnum.Inpaint)
-                {
-                    int no = LastSampleFileNo();
-                    // ファイルの移動（同じ名前のファイルがある場合は上書き）
-                    File.Move(Path.Combine(this.Parameter.Outdir, "example.png"), Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png"), true);
-                }
-
-                // イメージリストの更新
-                RefreshImageList();
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
-        #region 00000.pngの最後のファイル番号を取得する
-        /// <summary>
-        /// 00000.pngの最後のファイル番号を取得する
-        /// </summary>
-        /// <returns>ファイル番号</returns>
-        private int LastSampleFileNo()
-        {
-            string outdir_path = Path.Combine(this.Parameter.Outdir, "samples");
-            var reg = new Regex("\\\\[0-9]{5}.png");
-            var filepath = Directory.GetFiles(outdir_path).Where(f => reg.IsMatch(f)).OrderByDescending(n => n).ToArray().FirstOrDefault();
-            var filename = filepath != null ? filepath.Split("\\").Last() : string.Empty;
-
-            if (string.IsNullOrEmpty(filename))
-            {
-                return 0;
-            }
-            else
-            {
-                var filenameNotEx = int.Parse(filename.Replace(".png", ""));
-                return filenameNotEx;
-            }
-        }
-        #endregion
 
         #region プロンプトリストの保存処理
         /// <summary>
