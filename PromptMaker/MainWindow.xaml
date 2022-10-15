@@ -207,8 +207,7 @@
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="2" HorizontalAlignment="Right"/>
 
-                        <!--<GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">-->
-                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">
+                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">
 
                             <Grid MinWidth="200">
                                 <Grid.RowDefinitions>
