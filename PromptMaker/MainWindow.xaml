@@ -157,7 +157,7 @@
                                         <DataGridTextColumn Width="150" Header="URL" Binding="{Binding URL}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
-                                
+
                                 <Grid Margin="5" Grid.Row="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -207,16 +207,21 @@
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="2" HorizontalAlignment="Right"/>
 
-                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">
+                        <!--<GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">-->
+                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">
+
                             <Grid MinWidth="200">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="auto"/>
@@ -237,9 +242,14 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
+
                                 </Grid>
                                 <Grid Grid.Row="2">
                                     <Image x:Name="image" Grid.Row="1" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                    <Border BorderBrush="Black"
+                                            Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
+                                            Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}" Background="#7F000000"/>
+
                                     <InkCanvas Margin="5" x:Name="inkCanvas" Grid.Row="1" Background="{x:Null}" 
                                             Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
                                             Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}">
@@ -262,6 +272,60 @@
                                             </Style>
                                         </InkCanvas.Style>
                                     </InkCanvas>
+                                </Grid>
+                                <Grid Grid.Row="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Button Margin="5" Content="←" Grid.Row="1">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftLeft"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Content="→" Grid.Row="1" Grid.Column="2">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftRight"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Content="↑" Grid.Column="1">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftUp"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Content="↓" Grid.Column="1" Grid.Row="2">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftDown"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Content="手前" Grid.Row="2">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftForward"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Content="奥" Grid.Row="2" Grid.Column="2">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftBackward"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </GroupBox>
@@ -478,7 +542,7 @@
                                                     </b:EventTrigger>
                                                 </b:Interaction.Triggers>
                                             </MenuItem>
-                                            <MenuItem Header="Img2Imgフォルダへ">
+                                            <MenuItem Header="インプットへ">
                                                 <b:Interaction.Triggers>
                                                     <b:EventTrigger EventName="Click">
                                                         <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="MoveImg2Img"/>

@@ -1,4 +1,5 @@
-﻿using MVVMCore.Common.Utilities;
+﻿using MVVMCore.BaseClass;
+using MVVMCore.Common.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,7 @@ using Path = System.IO.Path;
 
 namespace PromptMaker.Models
 {
-    public class GfpGanM
+    public class GfpGanM : ModelBase
     {
         #region GFPGANの実行
         /// <summary>

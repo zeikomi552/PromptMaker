@@ -45,6 +45,56 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region インプットのオリジナルファイルパス[InputImageOrgPath]プロパティ
+        /// <summary>
+        /// インプットのオリジナルファイルパス[InputImageOrgPath]プロパティ用変数
+        /// </summary>
+        string _InputImageOrgPath = string.Empty;
+        /// <summary>
+        /// インプットのオリジナルファイルパス[InputImageOrgPath]プロパティ
+        /// </summary>
+        public string InputImageOrgPath
+        {
+            get
+            {
+                return _InputImageOrgPath;
+            }
+            set
+            {
+                if (_InputImageOrgPath == null || !_InputImageOrgPath.Equals(value))
+                {
+                    _InputImageOrgPath = value;
+                    NotifyPropertyChanged("InputImageOrgPath");
+                }
+            }
+        }
+        #endregion
+
+        #region Inpaint時に画像を操作するオブジェクト[ShiftPic]プロパティ
+        /// <summary>
+        /// Inpaint時に画像を操作するオブジェクト[ShiftPic]プロパティ用変数
+        /// </summary>
+        ShiftPicM _ShiftPic = new ShiftPicM();
+        /// <summary>
+        /// Inpaint時に画像を操作するオブジェクト[ShiftPic]プロパティ
+        /// </summary>
+        public ShiftPicM ShiftPic
+        {
+            get
+            {
+                return _ShiftPic;
+            }
+            set
+            {
+                if (_ShiftPic == null || !_ShiftPic.Equals(value))
+                {
+                    _ShiftPic = value;
+                    NotifyPropertyChanged("ShiftPic");
+                }
+            }
+        }
+        #endregion
+
         #region 設定ファイルオブジェクト[SettingConf]プロパティ
         /// <summary>
         /// 設定ファイルオブジェクト[SettingConf]プロパティ
@@ -765,9 +815,30 @@ namespace PromptMaker.Models
         {
             try
             {
+                // ファイルの存在確認
                 if (File.Exists(filepath))
                 {
-                    this.InitFilePath = filepath;
+                    // 一時フォルダの取得
+                    string tempDir = Path.Combine(Path.GetTempPath(), "PromptMaker-Input");
+                    string outfile = Path.Combine(tempDir, "example.png");
+                    string orgfile = Path.Combine(tempDir, "example_org.png");
+
+                    // ディレクトリが無い場合は作成する
+                    PathManager.CreateDirectory(tempDir);
+
+                    // ファイルコピー
+                    File.Copy(filepath, Path.Combine(tempDir, outfile), true);
+                    File.Copy(filepath, Path.Combine(tempDir, orgfile), true);
+
+                    // 初期ファイルパスの保存
+                    this.InputImageOrgPath = orgfile;
+
+                    // 初期化処理
+                    this.ShiftPic.Initialize(this);
+
+                    // 初期フォルダパス
+                    this.InitFilePath = string.Empty;   // いったんパスを外して更新する（こうしないとパスの変更イベントが発生しない）
+                    this.InitFilePath = outfile;        // パスのセット
                 }
                 else
                 {

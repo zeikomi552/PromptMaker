@@ -162,6 +162,10 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+
+
+
+
         #region ワードクラウド画像パス[ImagePath]プロパティ
         /// <summary>
         /// ワードクラウド画像パス[ImagePath]プロパティ用変数
@@ -223,6 +227,7 @@ namespace PromptMaker.ViewModels
                 this.PromptComposerConf.LoadXML();
                 this.Parameter.Outdir = Path.Combine(this.SettingConf.Item.CurrentDir, "outputs");
 
+                this.Parameter.ShiftPic.Initialize(this.Parameter);   // パラメータの保存
 
                 RefreshImageList();
 
