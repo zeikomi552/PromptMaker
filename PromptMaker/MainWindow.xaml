@@ -325,10 +325,10 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
-                                    <Button Margin="5" Content="テスト" Grid.Row="3" Grid.Column="2">
+                                    <Button Margin="5" Content="テスト" Grid.Column="2">
                                         <b:Interaction.Triggers>
                                             <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftBackward"/>
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="AutoTest"/>
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>

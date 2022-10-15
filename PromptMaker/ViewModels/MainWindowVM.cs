@@ -163,17 +163,13 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
-
-
-
-        #region ワードクラウド画像パス[ImagePath]プロパティ
+        #region 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ
         /// <summary>
-        /// ワードクラウド画像パス[ImagePath]プロパティ用変数
+        /// 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ用変数
         /// </summary>
         string _ImagePath = string.Empty;
         /// <summary>
-        /// ワードクラウド画像パス[ImagePath]プロパティ
+        /// 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ
         /// </summary>
         public string ImagePath
         {
@@ -383,50 +379,18 @@ namespace PromptMaker.ViewModels
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
-       
+
         #endregion
 
-        #region RealESRGANの保存先を開くダイアログ
+        #region ESRGANの実行処理
         /// <summary>
-        /// RealESRGANの保存先を開くダイアログ
+        /// ESRGANの実行処理
         /// </summary>
         public void ExecuteRealESRGAN()
         {
             try
             {
-                var myProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = "cmd.exe",
-                        RedirectStandardInput = true,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        WorkingDirectory = this.SettingConf.Item.CurrentDir
-                    }
-                };
-
-                myProcess.Start();
-                using (var sw = myProcess.StandardInput)
-                {
-                    if (sw.BaseStream.CanWrite)
-                    {
-                        int no = Utilities.LastSampleFileNo(this.Parameter.Outdir);
-                        string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
-
-                        sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{this.ImagePath}\" -o \"{filepath}\"");
-                    }
-                }
-
-                StreamReader myStreamReader = myProcess.StandardOutput;
-
-                string? myString = myStreamReader.ReadLine();
-                myProcess.WaitForExit();
-                myProcess.Close();
-
-                // イメージリストの更新
-                RefreshImageList();
-
+                this.Parameter.ExecuteRealESRGAN(this.ImagePath);
             }
             catch (Exception ex)
             {
@@ -443,15 +407,7 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                var path = this.ImagePath;
-                int no = Utilities.LastSampleFileNo(this.Parameter.Outdir);
-                string filepath = Path.Combine(this.Parameter.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
-
-                // GFPGANの実行
-                GfpGanM.Execute(this.SettingConf.Item.GFPGANPyPath, path, filepath);
-
-                // イメージリストの更新
-                RefreshImageList();
+                this.Parameter.ExecuteGFPGAN(this.ImagePath);
             }
             catch (Exception ex)
             {
@@ -460,6 +416,56 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        public void AutoTest(object sender, EventArgs ev)
+        {
+            try
+            {
+                int max = 100;
+                for (int i = 0; i < max; i++)
+                {
+                    // 初期ファイルの設定
+                    this.Parameter.SetInitFile(this.ImagePath);
+
+
+                    //if (i % 2 == 0)
+                    //{
+                    //    // 移動量を1にセット
+                    //    this.Parameter.ShiftPic.MovePx = 20;
+
+                    //    // 後ろへ移動
+                    //    this.Parameter.ShiftPic.ShiftBackward();
+                    //    // 右へ移動
+                    //    this.Parameter.ShiftPic.ShiftRight();
+
+                    //    // 下へ移動
+                    //    this.Parameter.ShiftPic.ShiftDown();
+                    //}
+                    //else
+                    {
+                        // 移動量を1にセット
+                        this.Parameter.ShiftPic.MovePx = 60;
+                        this.Parameter.ShiftPic.ShiftLeft();
+                    }
+
+
+                    // StableDiffusion実行
+                    this.Parameter.Execute(sender, ev);
+
+                    // DirectoryInfoのインスタンスを生成する
+                    DirectoryInfo di = new DirectoryInfo(Path.Combine(this.Parameter.Outdir, "samples"));
+
+                    // ディレクトリ直下のすべてのファイル一覧を取得する
+                    FileInfo[] fiAlls = di.GetFiles("*.png");
+
+                    // 出力先ファイルパスを取得し画面表示
+                    this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
 
         #region ファイル削除処理
         /// <summary>

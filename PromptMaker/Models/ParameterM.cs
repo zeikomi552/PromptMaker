@@ -1050,8 +1050,6 @@ namespace PromptMaker.Models
         }
         #endregion
 
-
-
         #region サブ関数
         /// <summary>
         /// サブ関数
@@ -1124,7 +1122,79 @@ namespace PromptMaker.Models
         #endregion
 
 
+        #region RealESRGANの保存先を開くダイアログ
+        /// <summary>
+        /// RealESRGANの保存先を開くダイアログ
+        /// </summary>
+        /// <param name="imagepath">画質を良くする元画像</param>
+        public void ExecuteRealESRGAN(string imagepath)
+        {
+            try
+            {
+                var myProcess = new Process
+                {
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = "cmd.exe",
+                        RedirectStandardInput = true,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        WorkingDirectory = this.SettingConf.Item.CurrentDir
+                    }
+                };
 
+                myProcess.Start();
+                using (var sw = myProcess.StandardInput)
+                {
+                    if (sw.BaseStream.CanWrite)
+                    {
+                        int no = Utilities.LastSampleFileNo(this.Outdir);
+                        string filepath = Path.Combine(this.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
 
+                        sw.WriteLine($"\"{this.SettingConf.Item.RealEsrganExePath}\" -i \"{imagepath}\" -o \"{filepath}\"");
+                    }
+                }
+
+                StreamReader myStreamReader = myProcess.StandardOutput;
+
+                string? myString = myStreamReader.ReadLine();
+                myProcess.WaitForExit();
+                myProcess.Close();
+
+                // イメージリストの更新
+                this.Parent!.RefreshImageList();
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region GFPGANの実行処理
+        /// <summary>
+        /// GFPGANの実行処理
+        /// </summary>
+        public void ExecuteGFPGAN(string imagepath)
+        {
+            try
+            {
+                var path = imagepath;
+                int no = Utilities.LastSampleFileNo(this.Outdir);
+                string filepath = Path.Combine(this.Outdir, "samples", $"{(no + 1).ToString("00000")}.png");
+
+                // GFPGANの実行
+                GfpGanM.Execute(this.SettingConf.Item.GFPGANPyPath, path, filepath);
+
+                // イメージリストの更新
+                this.Parent!.RefreshImageList();
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
     }
 }

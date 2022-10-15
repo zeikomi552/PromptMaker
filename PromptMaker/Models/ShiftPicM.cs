@@ -265,23 +265,6 @@ namespace PromptMaker.Models
         }
         #endregion
 
-        public void AutoTest()
-        {
-            try
-            {
-                int max = 10;
-                for (int i = 0; i < max; i++)
-                {
-                    // 後ろへ移動
-                    ShiftBackward();
-                    ShiftRight();
-                    ShiftDown();
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
+
     }
 }
