@@ -420,7 +420,7 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                int max = 100;
+                int max = this.Parameter.Repeat;
                 for (int i = 0; i < max; i++)
                 {
                     // 初期ファイルの設定
@@ -428,24 +428,19 @@ namespace PromptMaker.ViewModels
 
 
                     //if (i % 2 == 0)
-                    //{
-                    //    // 移動量を1にセット
-                    //    this.Parameter.ShiftPic.MovePx = 20;
-
-                    //    // 後ろへ移動
-                    //    this.Parameter.ShiftPic.ShiftBackward();
-                    //    // 右へ移動
-                    //    this.Parameter.ShiftPic.ShiftRight();
-
-                    //    // 下へ移動
-                    //    this.Parameter.ShiftPic.ShiftDown();
-                    //}
-                    //else
                     {
-                        // 移動量を1にセット
-                        this.Parameter.ShiftPic.MovePx = 60;
+                        // 後ろへ移動
+                        this.Parameter.ShiftPic.ShiftForward();
+                        // 右へ移動
                         this.Parameter.ShiftPic.ShiftLeft();
+
+                        // 下へ移動
+                        this.Parameter.ShiftPic.ShiftUp();
                     }
+                    //else
+                    //{
+                    //    this.Parameter.ShiftPic.ShiftLeft();
+                    //}
 
 
                     // StableDiffusion実行

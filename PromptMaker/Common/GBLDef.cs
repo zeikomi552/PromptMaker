@@ -14,7 +14,9 @@ namespace PromptMaker.Common
         [Description("Img2Img")]
         Img2Img,
         [Description("Inpaint")]
-        Inpaint
+        Inpaint,
+        [Description("Inpaint2")]
+        Inpaint2
     }
 
 

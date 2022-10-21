@@ -51,6 +51,11 @@
                             </b:Interaction.Triggers>
                         </Button>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Width="150" VerticalAlignment="Center" Margin="5" Text="Huggin Face アクセストークン"/>
+                        <TextBlock VerticalAlignment="Center" Margin="5" Text=":"/>
+                        <TextBox Width="500" VerticalAlignment="Center" Margin="5" Text="{Binding SettingConf.Item.AccessToken}"/>
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Real-ESRGAN設定">

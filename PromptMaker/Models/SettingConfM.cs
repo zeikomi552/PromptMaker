@@ -261,6 +261,33 @@ namespace PromptMaker.Models
         #endregion
 
 
+        #region Hugging Face用アクセストークン(inpaint2使用時のみ)[AccessToken]プロパティ
+        /// <summary>
+        /// Hugging Face用アクセストークン(inpaint2使用時のみ)[AccessToken]プロパティ用変数
+        /// </summary>
+        string _AccessToken = string.Empty;
+        /// <summary>
+        /// Hugging Face用アクセストークン(inpaint2使用時のみ)[AccessToken]プロパティ
+        /// </summary>
+        public string AccessToken
+        {
+            get
+            {
+                return _AccessToken;
+            }
+            set
+            {
+                if (_AccessToken == null || !_AccessToken.Equals(value))
+                {
+                    _AccessToken = value;
+                    NotifyPropertyChanged("AccessToken");
+                }
+            }
+        }
+        #endregion
+
+
+
 
 
     }

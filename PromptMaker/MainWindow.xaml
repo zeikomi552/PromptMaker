@@ -64,7 +64,7 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <Grid Visibility="{Binding Parameter.InpaintF, Converter={StaticResource InverseBooleanConverter}}">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="auto"/>
@@ -208,6 +208,7 @@
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="2" HorizontalAlignment="Right"/>
 
                         <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">
+                        <!--<GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">-->
 
                             <Grid MinWidth="200">
                                 <Grid.RowDefinitions>
@@ -245,9 +246,9 @@
                                 </Grid>
                                 <Grid Grid.Row="2">
                                     <Image x:Name="image" Grid.Row="1" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
-                                    <Border BorderBrush="Black"
+                                    <!--<Border BorderBrush="Black"
                                             Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
-                                            Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}" Background="#7F000000"/>
+                                            Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}" Background="#7F000000"/>-->
 
                                     <InkCanvas Margin="5" x:Name="inkCanvas" Grid.Row="1" Background="{x:Null}" 
                                             Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
@@ -283,6 +284,10 @@
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="オフセット"/>
+                                        <TextBox Margin="5" Grid.Row="1" Grid.Column="1" Text="{Binding Parameter.MaskOffset}" TextAlignment="Center"/>
+                                    </StackPanel>
                                     <Button Margin="5" Content="←" Grid.Row="1">
                                         <b:Interaction.Triggers>
                                             <b:EventTrigger EventName="Click">
@@ -290,6 +295,10 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
+                                    <StackPanel Grid.Row="1" Grid.Column="1">
+                                        <TextBlock Text="移動量"/>
+                                        <TextBox Margin="5" Text="{Binding Parameter.ShiftPic.MovePx}" TextAlignment="Center"/>
+                                    </StackPanel>
                                     <Button Margin="5" Content="→" Grid.Row="1" Grid.Column="2">
                                         <b:Interaction.Triggers>
                                             <b:EventTrigger EventName="Click">

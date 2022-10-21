@@ -90,8 +90,8 @@ namespace PromptMaker.Common
         /// <summary>
         /// キャンバスの保存処理
         /// </summary>
-        /// <param name="element"></param>
-        /// <param name="filePath"></param>
+        /// <param name="element">キャンバス</param>
+        /// <param name="filePath">出力先</param>
         public static void SaveCanvas(InkCanvas element, String filePath)
         {
             var width = (int)element.ActualWidth;
@@ -130,13 +130,16 @@ namespace PromptMaker.Common
         /// <param name="x">ずらしたXの移動量px</param>
         /// <param name="y">ずらしたYの移動量px</param>
         /// <param name="z">ずらしたZの移動量px</param>
-        public static void SetMask(string path, int x, int y, int z)
+        public static void SetMask(string path, int x, int y, int z, int offset = 5)
         {
             string filename = Path.GetFileName(path);
             string folderPath = System.IO.Path.GetDirectoryName(path)!;
             //folderPath = Path.Combine(folderPath, keyword);
             PathManager.CreateDirectory(folderPath);
             string tmppath = Path.Combine(folderPath, "tmp-" + filename);
+
+            int x_tmp = x == 0 ? 0 : x + offset;
+            int y_tmp = y == 0 ? 0 : y + offset;
 
             using (var bmp = new Bitmap(path))
             using (var fs = new FileStream(tmppath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -147,37 +150,39 @@ namespace PromptMaker.Common
                     g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                     g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
 
-                    if (x < 0)
+                    if (x_tmp < 0)
                     {
-                        for (int ix = bmp.Width; ix >= bmp.Width + x; ix--)
+                        for (int ix = bmp.Width; ix >= bmp.Width + x_tmp; ix--)
                         {
                             g.DrawLine(new Pen(Color.White), new System.Drawing.Point(ix, 0), new System.Drawing.Point(ix, bmp.Height));
                         }
                     }
                     else
                     {
-                        for (int ix = 0; ix <= x; ix++)
+                        for (int ix = 0; ix <= x_tmp; ix++)
                         {
                             g.DrawLine(new Pen(Color.White), new System.Drawing.Point(ix, 0), new System.Drawing.Point(ix, bmp.Height));
                         }
                     }
 
-                    if (y < 0)
+                    if (y_tmp < 0)
                     {
-                        for (int iy = bmp.Height; iy >= bmp.Height + y; iy--)
+                        for (int iy = bmp.Height; iy >= bmp.Height + y_tmp; iy--)
                         {
                             g.DrawLine(new Pen(Color.White), new System.Drawing.Point(0, iy), new System.Drawing.Point(bmp.Width, iy));
                         }
                     }
                     else
                     {
-                        for (int iy = 0; iy <= y; iy++)
+                        for (int iy = 0; iy <= y_tmp; iy++)
                         {
                             g.DrawLine(new Pen(Color.White), new System.Drawing.Point(0, iy), new System.Drawing.Point(bmp.Width, iy));
                         }
                     }
 
-                    int tz = (z*2 - x);
+                    int tz = (z * 2 - x);
+                    tz = z <= 0 ? 0 : tz + offset;
+
                     if (tz >= 0)
                     {
                         for (int iz = bmp.Width; iz >= bmp.Width - tz; iz--)
@@ -187,6 +192,8 @@ namespace PromptMaker.Common
                     }
 
                     tz = (z * 2 - y);
+                    tz = z <= 0 ? 0 : tz + offset;
+
                     if (tz >= 0)
                     {
                         for (int iz = bmp.Height; iz >= bmp.Height - tz; iz--)
@@ -205,6 +212,49 @@ namespace PromptMaker.Common
 
         }
         #endregion
+
+        /// <summary>
+        /// 画像の重ね合わせ処理
+        /// </summary>
+        /// <param name="base_pic">下になる画像</param>
+        /// <param name="add_pic">上に重ね合わせる画像</param>
+        /// <param name="outfile">出力ファイル</param>
+        /// <param name="move_x">Xの移動量</param>
+        /// <param name="move_y">Yの移動量</param>
+        /// <param name="move_z">Zの移動量(奥行き)</param>
+        public static void OverridePic(string base_pic, string add_pic, string outfile, int move_x, int move_y, int move_z)
+        {
+            string filename = Path.GetFileName(outfile);
+            string folderPath = System.IO.Path.GetDirectoryName(outfile)!;
+            PathManager.CreateDirectory(folderPath);
+
+            using (var bmp = new Bitmap(add_pic))
+            using (var fs = new FileStream(outfile, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                using (var outbmp = new Bitmap(base_pic))
+                {
+                    using (var g = Graphics.FromImage(outbmp))
+                    {
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        int move_x_tmp = move_x > 0 ? move_x : 0;
+                        int move_y_tmp = move_y > 0 ? move_y : 0;
+                        int x_max = bmp.Width + (move_x - 2 * move_z) > bmp.Width ? bmp.Width : bmp.Width + (move_x - 2 * move_z);
+                        int y_max = bmp.Height + (move_y - 2 * move_z) > bmp.Height ? bmp.Height : bmp.Height + (move_y - 2 * move_z);
+
+
+                        for (int x = move_x_tmp; x < x_max; x++)
+                        {
+                            for (int y = move_y_tmp; y < y_max; y++)
+                            {
+                                outbmp.SetPixel(x, y, bmp.GetPixel(x, y));
+                            }
+                        }
+                    }
+
+                    outbmp.Save(fs, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+        }
 
         #region 移動処理
         /// <summary>
@@ -234,7 +284,7 @@ namespace PromptMaker.Common
                     }
 
                     fs.SetLength(0);
-                    outbmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+                    outbmp.Save(fs, System.Drawing.Imaging.ImageFormat.Jpeg);
                 }
             }
         }

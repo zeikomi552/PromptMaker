@@ -34,6 +34,31 @@ namespace PromptMaker.Models
         /// </summary>
         public MainWindowVM? Parent { get; set; }
 
+        #region マスクする範囲に厚みを持たせる[MaskOffset]プロパティ
+        /// <summary>
+        /// マスクする範囲に厚みを持たせる[MaskOffset]プロパティ用変数
+        /// </summary>
+        int _MaskOffset = 10;
+        /// <summary>
+        /// マスクする範囲に厚みを持たせる[MaskOffset]プロパティ
+        /// </summary>
+        public int MaskOffset
+        {
+            get
+            {
+                return _MaskOffset;
+            }
+            set
+            {
+                if (!_MaskOffset.Equals(value))
+                {
+                    _MaskOffset = value;
+                    NotifyPropertyChanged("MaskOffset");
+                }
+            }
+        }
+        #endregion
+
         #region 繰り返し回数[Repeat]プロパティ
         /// <summary>
         /// 繰り返し回数[Repeat]プロパティ用変数
@@ -467,7 +492,7 @@ namespace PromptMaker.Models
         {
             get
             {
-                return this.ScriptType == ScriptTypeEnum.Inpaint;
+                return this.ScriptType == ScriptTypeEnum.Inpaint || this.ScriptType == ScriptTypeEnum.Inpaint2;
             }
         }
         #endregion
@@ -697,6 +722,10 @@ namespace PromptMaker.Models
                         {
                             return Command_Inpaint;
                         }
+                    case ScriptTypeEnum.Inpaint2:
+                        {
+                            return Command_Inpaint2;
+                        }
                 }
             }
         }
@@ -721,7 +750,7 @@ namespace PromptMaker.Models
                     command.AppendLine("python optimizedSD/optimized_txt2img.py");
                 }
 
-                command.AppendLine($"--prompt \"{this.Prompt}\"");
+                command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
                 command.AppendLine($"--n_iter {N_iter}");
 
                 // 大きいサイズで作成する場合Optimizeの方を使用する
@@ -751,7 +780,7 @@ namespace PromptMaker.Models
             {
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/img2img.py");
-                command.AppendLine($"--prompt \"{this.Prompt}\"");
+                command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
                 command.AppendLine($"--init-img");
                 command.AppendLine($"{this.InitFilePath}");
                 command.AppendLine($"--n_iter {N_iter}");
@@ -786,6 +815,40 @@ namespace PromptMaker.Models
                 command.AppendLine(outdir_path);
                 command.AppendLine($"--steps");
                 command.AppendLine($"{this.Ddim_steps}");
+                return command.ToString().Replace("\r\n", " ");
+            }
+        }
+
+        /// <summary>
+        /// コマンド
+        /// </summary>
+        public string Command_Inpaint2
+        {
+            get
+            {
+                string indir_path = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting");
+                string outdir_path = this.Outdir;
+                int last_no = Utilities.LastSampleFileNo(outdir_path);
+
+
+                StringBuilder command = new StringBuilder();
+                command.AppendLine("python scripts/inpaint2.py");
+                command.AppendLine($"--init-img");
+                command.AppendLine("\"" + Path.Combine(indir_path, "example.png"+ "\""));
+                command.AppendLine($"--mask-img");
+                command.AppendLine("\"" + Path.Combine(indir_path, "example_mask.png"+ "\""));
+                command.AppendLine($"--out-img");
+                command.AppendLine("\"" + Path.Combine(outdir_path, "samples", $"{(last_no+1).ToString("00000") + ".png"}" + "\""));
+                command.AppendLine($"--ddim_steps");
+                command.AppendLine($"{this.Ddim_steps}");
+                command.AppendLine($"--H {this.Height}");
+                command.AppendLine($"--W {this.Width}");
+                command.AppendLine($"--strength {this.Strength}");
+                command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
+                command.AppendLine($"--model-id");
+                command.AppendLine($"\"CompVis/stable-diffusion-v1-4\"");
+                command.AppendLine($"--accesstoken \"{this.SettingConf.Item.AccessToken}\"");
+                command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
                 return command.ToString().Replace("\r\n", " ");
             }
         }
@@ -1073,20 +1136,33 @@ namespace PromptMaker.Models
                 if (this.InpaintF)
                 {
                     // ファイルコピー
-                    File.Copy(this.InitFilePath, Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example.png"), true);
+                    string file_tmp_path = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example_tmp.png");
+                    File.Copy(this.InitFilePath, file_tmp_path, true);
 
+                    // MainWindowを取得
                     var wnd = VisualTreeHelperWrapper.FindAncestor<Window>((Button)sender) as MainWindow;
 
+                    // nullチェック
                     if (wnd != null)
                     {
-                        var canvas = wnd!.inkCanvas;
-                        string filepath = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example_mask.png");
-                        Utilities.SaveCanvas(canvas, filepath);
+                        var canvas = wnd!.inkCanvas;    // InkCanvasを取得
+
+                        // Maskファイルの作成
+                        string maskfile_path = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example_mask.png");
 
                         int x = this.ShiftPic.MoveXPos;
                         int y = this.ShiftPic.MoveYPos;
                         int z = this.ShiftPic.MoveZPos;
-                        Utilities.SetMask(filepath, x, y, z);
+
+                        // InkCanvasのマスク情報
+                        Utilities.SaveCanvas(canvas, maskfile_path);
+
+                        // 移動量分のマスク情報
+                        Utilities.SetMask(maskfile_path, x, y, z, this.MaskOffset);
+
+                        // 出力先ファイルパスのセット
+                        string file_path = Path.Combine(this.SettingConf.Item.CurrentDir, "inputs", "inpainting", "example.png");
+                        Utilities.OverridePic(this.InputImageOrgPath, file_tmp_path, file_path, x, y, z);
                     }
                 }
 

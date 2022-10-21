@@ -148,7 +148,6 @@ namespace PromptMaker.Models
             this.MoveXPos = 0;
             this.MoveYPos = 0;
             this.MoveZPos = 0;
-            this.MovePx = 10;
         }
         #endregion
 
