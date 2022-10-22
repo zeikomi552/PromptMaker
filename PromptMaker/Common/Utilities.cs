@@ -86,6 +86,13 @@ namespace PromptMaker.Common
         }
         #endregion
 
+        #region 画像のリサイズ
+        /// <summary>
+        /// 画像のリサイズ
+        /// </summary>
+        /// <param name="path">ファイルパス</param>
+        /// <param name="width">幅</param>
+        /// <param name="height">高さ</param>
         public static void ResizePic(string path, int width, int height)
         {
             string filename = Path.GetFileName(path);
@@ -110,6 +117,7 @@ namespace PromptMaker.Common
                 }
             }
         }
+        #endregion
 
         #region キャンバスの保存処理
         /// <summary>
