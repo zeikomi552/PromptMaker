@@ -86,6 +86,31 @@ namespace PromptMaker.Common
         }
         #endregion
 
+        public static void ResizePic(string path, int width, int height)
+        {
+            string filename = Path.GetFileName(path);
+            string folderPath = System.IO.Path.GetDirectoryName(path)!;
+            PathManager.CreateDirectory(folderPath);
+
+            using (var bmp = new Bitmap(path))
+            using (var fs = new FileStream(Path.Combine(folderPath,"tmp_" + filename), FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                using (var resizebmp = new Bitmap(width, height))
+                {
+                    using (var g = Graphics.FromImage(resizebmp))
+                    {
+
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(bmp, 0, 0, width, height);
+                    }
+
+                    fs.SetLength(0);
+
+                    resizebmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+                }
+            }
+        }
+
         #region キャンバスの保存処理
         /// <summary>
         /// キャンバスの保存処理

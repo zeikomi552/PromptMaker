@@ -185,6 +185,33 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region テストのリピート回数[TestRepeatCount]プロパティ
+        /// <summary>
+        /// テストのリピート回数[TestRepeatCount]プロパティ用変数
+        /// </summary>
+        int _TestRepeatCount = 1;
+        /// <summary>
+        /// テストのリピート回数[TestRepeatCount]プロパティ
+        /// </summary>
+        public int TestRepeatCount
+        {
+            get
+            {
+                return _TestRepeatCount;
+            }
+            set
+            {
+                if (!_TestRepeatCount.Equals(value))
+                {
+                    _TestRepeatCount = value;
+                    NotifyPropertyChanged("TestRepeatCount");
+                }
+            }
+        }
+        #endregion
+
+
+
         #region イメージ画像リスト[ImagePathList]プロパティ
         /// <summary>
         /// イメージ画像リスト[ImagePathList]プロパティ用変数
@@ -416,45 +443,197 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+
+        private string LastFilePath
+        {
+            get
+            {
+                // DirectoryInfoのインスタンスを生成する
+                DirectoryInfo di = new DirectoryInfo(Path.Combine(this.Parameter.Outdir, "samples"));
+
+                // ディレクトリ直下のすべてのファイル一覧を取得する
+                FileInfo[] fiAlls = di.GetFiles("*.png");
+
+                return fiAlls.Last().FullName;
+            }
+        }
+
+        private void DeleteFile()
+        {
+            // DirectoryInfoのインスタンスを生成する
+            DirectoryInfo di = new DirectoryInfo(Path.Combine(this.Parameter.Outdir, "samples"));
+
+            // ディレクトリ直下のすべてのファイル一覧を取得する
+            var fiAlls = di.GetFiles("*.png").ToList<FileInfo>();
+
+            if(this.Parameter.ScriptType == ScriptTypeEnum.Img2Img)
+            {
+                string file = fiAlls.ElementAt(fiAlls.Count - 1).FullName;
+                File.Delete(file);
+                file = fiAlls.ElementAt(fiAlls.Count - 2).FullName;
+                File.Delete(file);
+            }
+        }
+        private void AutoTestForMoveForward(object sender, EventArgs ev)
+        {
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+
+            // 後ろへ移動
+            this.Parameter.ShiftPic.ShiftBackward();
+
+            // 右へ移動
+            this.Parameter.ShiftPic.ShiftRight();
+
+            // 下へ移動
+            this.Parameter.ShiftPic.ShiftDown();
+
+            // StableDiffusion実行
+            this.Parameter.Execute(sender, ev);
+
+            // 不要ファイルを削除
+            DeleteFile();
+
+            // 出力先ファイルパスを取得し画面表示
+            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+
+            string imgpath = this.ImagePath;    // 高画質化の前のイメージパスの保持
+
+            // RealESRGANの実行
+            ExecuteRealESRGAN();
+
+            // ファイル名の変更と上書き
+            File.Move(this.LastFilePath, imgpath, true);
+
+            // 出力先ファイルパスを取得し画面表示
+            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+
+            // リサイズ前のファイルパスの保持
+            imgpath = this.ImagePath;
+
+            // サイズ縮小
+            Utilities.ResizePic(this.ImagePath, this.Parameter.Width, this.Parameter.Height);
+
+            // ファイル名の変更と上書き
+            File.Move(this.LastFilePath, imgpath, true);
+
+            // 出力先ファイルパスを取得し画面表示
+            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+        }
+
+        private void AutoTestForMoveBackward(object sender, EventArgs ev)
+        {
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+
+            // 後ろへ移動
+            this.Parameter.ShiftPic.ShiftForward();
+
+            // 右へ移動
+            this.Parameter.ShiftPic.ShiftLeft();
+
+            // 下へ移動
+            this.Parameter.ShiftPic.ShiftUp();
+
+            // StableDiffusion実行
+            this.Parameter.Execute(sender, ev);
+
+            // 不要ファイルを削除
+            DeleteFile();
+
+            // 出力先ファイルパスを取得し画面表示
+            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+
+            string imgpath = this.ImagePath;    // 高画質化の前のイメージパスの保持
+
+            // RealESRGANの実行
+            ExecuteRealESRGAN();
+
+            // ファイル名の変更と上書き
+            File.Move(this.LastFilePath, imgpath, true);
+
+            // 出力先ファイルパスを取得し画面表示
+            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+
+            // リサイズ前のファイルパスの保持
+            imgpath = this.ImagePath;
+
+            // サイズ縮小
+            Utilities.ResizePic(this.ImagePath, this.Parameter.Width, this.Parameter.Height);
+
+            // ファイル名の変更と上書き
+            File.Move(this.LastFilePath, imgpath, true);
+
+            // 出力先ファイルパスを取得し画面表示
+            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+
+            // 初期ファイルの設定
+            this.Parameter.SetInitFile(this.ImagePath);
+        }
+
+        private void SetRandomPrompt()
+        {
+            for (int i = 0; i < this.PromptComposerConf.Item.Items.Count; i++)
+            {
+                var elem = this.PromptComposerConf.Item.Items.ElementAt(i);
+                elem.IsEnable = false;
+            }
+
+            if (this.PromptComposerConf.Item.Items.Count > 0)
+            {
+                int index = _rand.Next(0, this.PromptComposerConf.Item.Items.Count - 1);
+                this.PromptComposerConf.Item.Items.ElementAt(index).IsEnable = true;
+            }
+        }
+
+        Random _rand = new Random();
         public void AutoTest(object sender, EventArgs ev)
         {
             try
             {
-                int max = this.Parameter.Repeat;
+                int max = this.TestRepeatCount;
+
                 for (int i = 0; i < max; i++)
                 {
-                    // 初期ファイルの設定
-                    this.Parameter.SetInitFile(this.ImagePath);
-
-
-                    //if (i % 2 == 0)
+                    if (i % 30 == 0)
                     {
-                        // 後ろへ移動
-                        this.Parameter.ShiftPic.ShiftForward();
-                        // 右へ移動
-                        this.Parameter.ShiftPic.ShiftLeft();
-
-                        // 下へ移動
-                        this.Parameter.ShiftPic.ShiftUp();
+                        SetRandomPrompt();  // プロンプトの変更
                     }
-                    //else
-                    //{
-                    //    this.Parameter.ShiftPic.ShiftLeft();
-                    //}
 
+                    if (i >= 0 && i < 10)
+                    {
+                        this.Parameter.Strength = (decimal)0.3;
+                    }
+                    else if (i >= 10 && i < 20)
+                    {
+                        this.Parameter.Strength = (decimal)0.45;
+                    }
+                    else
+                    {
+                        this.Parameter.Strength = (decimal)0.6;
+                    }
 
-                    // StableDiffusion実行
-                    this.Parameter.Execute(sender, ev);
-
-                    // DirectoryInfoのインスタンスを生成する
-                    DirectoryInfo di = new DirectoryInfo(Path.Combine(this.Parameter.Outdir, "samples"));
-
-                    // ディレクトリ直下のすべてのファイル一覧を取得する
-                    FileInfo[] fiAlls = di.GetFiles("*.png");
-
-                    // 出力先ファイルパスを取得し画面表示
-                    this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
+                    AutoTestForMoveBackward(sender, ev);
                 }
+
+                // イメージリストの更新
+                RefreshImageList();
+
             }
             catch (Exception ex)
             {

@@ -283,6 +283,7 @@
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="オフセット"/>
@@ -341,6 +342,11 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
+                                    <StackPanel Grid.Row="3" Grid.Column="0">
+                                        <TextBlock Text="繰り返し回数"/>
+                                        <TextBox Margin="5" Text="{Binding TestRepeatCount}" TextAlignment="Center"/>
+                                    </StackPanel>
+
                                 </Grid>
                             </Grid>
                         </GroupBox>
