@@ -33,6 +33,7 @@ using System.Text.RegularExpressions;
 using File = System.IO.File;
 using System.Security.Cryptography;
 using System.Windows.Ink;
+using MahApps.Metro.Converters;
 
 namespace PromptMaker.ViewModels
 {
@@ -210,8 +211,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
-
         #region イメージ画像リスト[ImagePathList]プロパティ
         /// <summary>
         /// イメージ画像リスト[ImagePathList]プロパティ用変数
@@ -236,6 +235,34 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
+
+
+        #region 実行中フラグ[ExecuteF]プロパティ
+        /// <summary>
+        /// 実行中フラグ[ExecuteF]プロパティ用変数
+        /// </summary>
+        bool _ExecuteF = false;
+        /// <summary>
+        /// 実行中フラグ[ExecuteF]プロパティ
+        /// </summary>
+        public bool ExecuteF
+        {
+            get
+            {
+                return _ExecuteF;
+            }
+            set
+            {
+                if (!_ExecuteF.Equals(value))
+                {
+                    _ExecuteF = value;
+                    NotifyPropertyChanged("ExecuteF");
+                }
+            }
+        }
+        #endregion
+
+
 
         #region 初期化処理
         /// <summary>
@@ -410,14 +437,26 @@ namespace PromptMaker.ViewModels
         #endregion
 
         #region ESRGANの実行処理
-        /// <summary>
-        /// ESRGANの実行処理
-        /// </summary>
         public void ExecuteRealESRGAN()
         {
             try
             {
-                this.Parameter.ExecuteRealESRGAN(this.ImagePath);
+                ExecuteRealESRGAN(this.ImagePath);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+
+        /// <summary>
+        /// ESRGANの実行処理
+        /// </summary>
+        public void ExecuteRealESRGAN(string img_path)
+        {
+            try
+            {
+                this.Parameter.ExecuteRealESRGAN(img_path);
             }
             catch (Exception ex)
             {
@@ -443,7 +482,10 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
+        #region 最後のファイルパスを取得
+        /// <summary>
+        /// 最後のファイルパスを取得
+        /// </summary>
         private string LastFilePath
         {
             get
@@ -457,7 +499,12 @@ namespace PromptMaker.ViewModels
                 return fiAlls.Last().FullName;
             }
         }
+        #endregion
 
+        #region ファイルの削除処理
+        /// <summary>
+        /// ファイルの削除処理
+        /// </summary>
         private void DeleteFile()
         {
             // DirectoryInfoのインスタンスを生成する
@@ -474,67 +521,25 @@ namespace PromptMaker.ViewModels
                 File.Delete(file);
             }
         }
-        private void AutoTestForMoveForward(object sender, EventArgs ev)
+        #endregion
+
+
+        private void AutoTestForMoveBackward(object sender, EventArgs ev, int retry =10)
         {
+            // プロンプトの有効数確認
+            var enable_prompt_count = (from x in this.PromptComposerConf.Item.Items
+                       where x.IsEnable == true
+                       select x).Count();
+
+            // 有効になってるものが無い場合処理を実行しない
+            if(enable_prompt_count <= 0)
+                return;
+            
+
+            string img_path = this.ImagePath;
             // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
-
-            // 後ろへ移動
-            this.Parameter.ShiftPic.ShiftBackward();
-
-            // 右へ移動
-            this.Parameter.ShiftPic.ShiftRight();
-
-            // 下へ移動
-            this.Parameter.ShiftPic.ShiftDown();
-
-            // StableDiffusion実行
-            this.Parameter.Execute(sender, ev);
-
-            // 不要ファイルを削除
-            DeleteFile();
-
-            // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
-
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
-
-            string imgpath = this.ImagePath;    // 高画質化の前のイメージパスの保持
-
-            // RealESRGANの実行
-            ExecuteRealESRGAN();
-
-            // ファイル名の変更と上書き
-            File.Move(this.LastFilePath, imgpath, true);
-
-            // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
-
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
-
-            // リサイズ前のファイルパスの保持
-            imgpath = this.ImagePath;
-
-            // サイズ縮小
-            Utilities.ResizePic(this.ImagePath, this.Parameter.Width, this.Parameter.Height);
-
-            // ファイル名の変更と上書き
-            File.Move(this.LastFilePath, imgpath, true);
-
-            // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
-
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
-        }
-
-        private void AutoTestForMoveBackward(object sender, EventArgs ev)
-        {
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
-
+            this.Parameter.SetInitFile(img_path);
+ 
             // 後ろへ移動
             this.Parameter.ShiftPic.ShiftForward();
 
@@ -551,42 +556,43 @@ namespace PromptMaker.ViewModels
             DeleteFile();
 
             // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+            this.Parameter.OutputFilePath = img_path = LastFilePath;
 
             // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
-
-            string imgpath = this.ImagePath;    // 高画質化の前のイメージパスの保持
+            this.Parameter.SetInitFile(img_path);
 
             // RealESRGANの実行
-            ExecuteRealESRGAN();
+            ExecuteRealESRGAN(img_path);
 
             // ファイル名の変更と上書き
-            File.Move(this.LastFilePath, imgpath, true);
+            Utilities.FileMove(this.LastFilePath, img_path, true);
 
             // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+            this.Parameter.OutputFilePath = img_path = this.LastFilePath;
 
             // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
-
-            // リサイズ前のファイルパスの保持
-            imgpath = this.ImagePath;
+            this.Parameter.SetInitFile(img_path);
 
             // サイズ縮小
-            Utilities.ResizePic(this.ImagePath, this.Parameter.Width, this.Parameter.Height);
-
-            // ファイル名の変更と上書き
-            File.Move(this.LastFilePath, imgpath, true);
+            Utilities.ResizePic(img_path, this.Parameter.Width, this.Parameter.Height);
 
             // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = this.ImagePath = LastFilePath;
+            this.Parameter.OutputFilePath = img_path = this.LastFilePath;
 
             // 初期ファイルの設定
-            this.Parameter.SetInitFile(this.ImagePath);
+            this.Parameter.SetInitFile(img_path);
+
+            // 最後の画像をセット
+            this.ImagePath = this.LastFilePath;
+
+            // イメージリストの更新
+            RefreshImageList();
         }
 
-        private void SetRandomPrompt()
+        /// <summary>
+        /// プロンプトの変更処理
+        /// </summary>
+        private void SetRandomPrompt(int index)
         {
             for (int i = 0; i < this.PromptComposerConf.Item.Items.Count; i++)
             {
@@ -596,50 +602,50 @@ namespace PromptMaker.ViewModels
 
             if (this.PromptComposerConf.Item.Items.Count > 0)
             {
-                int index = _rand.Next(0, this.PromptComposerConf.Item.Items.Count - 1);
                 this.PromptComposerConf.Item.Items.ElementAt(index).IsEnable = true;
             }
         }
 
         Random _rand = new Random();
+
+        #region 自動テスト
+        /// <summary>
+        /// 自動テスト
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ev"></param>
         public void AutoTest(object sender, EventArgs ev)
         {
             try
             {
                 int max = this.TestRepeatCount;
 
-                for (int i = 0; i < max; i++)
+                Task.Run(() =>
                 {
-                    if (i % 30 == 0)
+                    try
                     {
-                        SetRandomPrompt();  // プロンプトの変更
-                    }
+                        this.Parameter.N_iter = 1;
 
-                    if (i >= 0 && i < 10)
+                        while(this.ExecuteF)
+                        {
+                            AutoTestForMoveBackward(sender, ev);
+                        }
+
+                        // 実行フラグのOFF
+                        this.ExecuteF = false;
+                    }
+                    catch (Exception ex2)
                     {
-                        this.Parameter.Strength = (decimal)0.3;
+                        ShowMessage.ShowErrorOK(ex2.Message, "Error");
                     }
-                    else if (i >= 10 && i < 20)
-                    {
-                        this.Parameter.Strength = (decimal)0.45;
-                    }
-                    else
-                    {
-                        this.Parameter.Strength = (decimal)0.6;
-                    }
-
-                    AutoTestForMoveBackward(sender, ev);
-                }
-
-                // イメージリストの更新
-                RefreshImageList();
-
+                });
             }
             catch (Exception ex)
             {
                 ShowMessage.ShowErrorOK(ex.Message, "Error");
             }
         }
+        #endregion
 
         #region ファイル削除処理
         /// <summary>

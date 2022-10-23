@@ -77,10 +77,7 @@ namespace PromptMaker.Common
                         g.DrawImage(bmp, 0, 0, resizeWidth, resizeHeight);
                         g.DrawString(text, new Font("Arial", 12), System.Drawing.Brushes.Red, new PointF(10.0f, 10.0f));
                     }
-
-                    fs.SetLength(0);
-
-                    resizebmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+                    Utilities.BitmapSave(fs, resizebmp);
                 }
             }
         }
@@ -93,29 +90,40 @@ namespace PromptMaker.Common
         /// <param name="path">ファイルパス</param>
         /// <param name="width">幅</param>
         /// <param name="height">高さ</param>
-        public static void ResizePic(string path, int width, int height)
+        public static void ResizePic(string path, int width, int height, int retry = 10)
         {
-            string filename = Path.GetFileName(path);
-            string folderPath = System.IO.Path.GetDirectoryName(path)!;
-            PathManager.CreateDirectory(folderPath);
-
-            using (var bmp = new Bitmap(path))
-            using (var fs = new FileStream(Path.Combine(folderPath,"tmp_" + filename), FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            try
             {
-                using (var resizebmp = new Bitmap(width, height))
+                string filename = Path.GetFileName(path);
+                string folderPath = System.IO.Path.GetDirectoryName(path)!;
+                PathManager.CreateDirectory(folderPath);
+
+                string tmp_path = Path.Combine(folderPath, "tmp_" + filename);
+
+                using (var bmp = new Bitmap(path))
+                using (var fs = new FileStream(tmp_path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 {
-                    using (var g = Graphics.FromImage(resizebmp))
+                    using (var resizebmp = new Bitmap(width, height))
                     {
+                        using (var g = Graphics.FromImage(resizebmp))
+                        {
 
-                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                        g.DrawImage(bmp, 0, 0, width, height);
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            g.DrawImage(bmp, 0, 0, width, height);
+                        }
+
+                        Utilities.BitmapSave(fs, resizebmp);
                     }
-
-                    fs.SetLength(0);
-
-                    resizebmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                 }
+
+                // ファイル名の変更と上書き
+                Utilities.FileMove(tmp_path, path, true);
             }
+            catch (Exception e)
+            {
+                ShowMessage.ShowErrorOK(e.Message + "\r\n" + e.Source, "Error");
+            }
+
         }
         #endregion
 
@@ -237,11 +245,10 @@ namespace PromptMaker.Common
 
                 }
 
-                fs.SetLength(0);
-
-                bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+                Utilities.BitmapSave(fs, bmp);
             }
-            File.Move(tmppath, path, true);
+
+            Utilities.FileMove(tmppath, path, true);
 
         }
         #endregion
@@ -331,20 +338,18 @@ namespace PromptMaker.Common
         /// <param name="movevalue">移動量</param>
         /// <param name="overwrite">true:元画像に上書き false:上書きしない</param>
         /// <returns>出力先ファイルパス</returns>
-        public static string ShiftPos(string infile, int move_x, int move_y, int move_z, bool overwrite = false)
+        public static string ShiftPos(string infile, int move_x, int move_y, int move_z, bool overwrite = false, int retry = 10)
         {
             string filename = Path.GetFileName(infile);                    // ファイル名の取得
             string folderPath = System.IO.Path.GetDirectoryName(infile)!;  // フォルダパスの取得
             string outfile = Path.Combine(folderPath, "tmp-" + filename);                       // 出力先ファイルパス(一時的)
-            //string infile = this.Parameter.InitFilePath;                                        // 入力ファイルパス
-
-            // ずらして保存する
+                                                                                                // ずらして保存する
             Utilities.MovePos(infile, outfile, move_x, move_y, move_z);
 
             if (overwrite)
             {
                 // ずらしたファイルをオリジナル画像に上書きする
-                File.Move(outfile, infile, true);
+                Utilities.FileMove(outfile, infile, true, retry);
                 return infile;
             }
             else
@@ -353,5 +358,91 @@ namespace PromptMaker.Common
             }
         }
         #endregion
+
+        /// <summary>
+        /// ファイル移動処理
+        /// </summary>
+        /// <param name="source_path">移動元ファイルパス</param>
+        /// <param name="dest_path">移動先ファイルパス</param>
+        /// <param name="overwrite">上書き</param>
+        /// <param name="retry">リトライ回数</param>
+        public static void FileMove(string source_path, string dest_path, bool overwrite = true, int retry = 10 )
+        {
+            int count = 0;
+            while (count <= retry)
+            {
+                try
+                {
+                    // ファイル名の変更と上書き
+                    File.Move(source_path, dest_path, true);
+                    break;
+                }
+                catch
+                {
+                    if (count == retry)
+                        throw;
+
+                    System.Threading.Thread.Sleep(100);
+                    count++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// ファイルコピー処理
+        /// </summary>
+        /// <param name="source_path">移動元ファイルパス</param>
+        /// <param name="dest_path">移動先ファイルパス</param>
+        /// <param name="overwrite">上書き</param>
+        /// <param name="retry">リトライ回数</param>
+        public static void FileCopy(string source_path, string dest_path, bool overwrite = true, int retry = 10)
+        {
+            int count = 0;
+            while (count <= retry)
+            {
+                try
+                {
+                    // ファイル名の変更と上書き
+                    File.Copy(source_path, dest_path, true);
+                    break;
+                }
+                catch
+                {
+                    if (count == retry)
+                        throw;
+
+                    System.Threading.Thread.Sleep(100);
+                    count++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// リトライ回数を設定できるビットマップ保存処理
+        /// </summary>
+        /// <param name="fs">ファイルストリーム</param>
+        /// <param name="outbmp">ビットマップオブジェクト</param>
+        /// <param name="retry">リトライ回数[デフォルト3]</param>
+        public static void BitmapSave(FileStream fs, Bitmap outbmp, int retry = 10)
+        {
+            int count = 0;
+            while (count <= retry)
+            {
+                try
+                {
+                    fs.SetLength(0);
+                    outbmp.Save(fs, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    break;
+                }
+                catch
+                {
+                    if (count == retry)
+                        throw;
+
+                    System.Threading.Thread.Sleep(100);
+                    count++;
+                }
+            }
+        }
     }
 }

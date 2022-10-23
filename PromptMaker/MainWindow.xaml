@@ -207,8 +207,8 @@
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
                         <GridSplitter Background="AliceBlue" Width="3" Grid.Column="2" HorizontalAlignment="Right"/>
 
-                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">
-                        <!--<GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">-->
+                        <!--<GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">-->
+                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">
 
                             <Grid MinWidth="200">
                                 <Grid.RowDefinitions>
@@ -335,13 +335,13 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
-                                    <Button Margin="5" Content="テスト" Grid.Column="2">
+                                    <ToggleButton Margin="5" Content="テスト" Grid.Column="2" IsChecked="{Binding ExecuteF}">
                                         <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
+                                            <b:EventTrigger EventName="Checked">
                                                 <b:CallMethodAction TargetObject="{Binding}" MethodName="AutoTest"/>
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
-                                    </Button>
+                                    </ToggleButton>
                                     <StackPanel Grid.Row="3" Grid.Column="0">
                                         <TextBlock Text="繰り返し回数"/>
                                         <TextBox Margin="5" Text="{Binding TestRepeatCount}" TextAlignment="Center"/>

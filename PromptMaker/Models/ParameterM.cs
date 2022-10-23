@@ -902,8 +902,8 @@ namespace PromptMaker.Models
                     PathManager.CreateDirectory(tempDir);
 
                     // ファイルコピー
-                    File.Copy(filepath, Path.Combine(tempDir, outfile), true);
-                    File.Copy(filepath, Path.Combine(tempDir, orgfile), true);
+                    Utilities.FileCopy(filepath, Path.Combine(tempDir, outfile), true);
+                    Utilities.FileCopy(filepath, Path.Combine(tempDir, orgfile), true);
 
                     // 初期ファイルパスの保存
                     this.InputImageOrgPath = orgfile;
