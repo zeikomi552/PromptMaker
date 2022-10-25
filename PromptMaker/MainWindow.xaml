@@ -421,7 +421,7 @@
                                     </StackPanel>
                                 </Grid>
                                 <Grid Grid.Row="1">
-                                    <Image Margin="5,5,5,5" Source="{Binding ImagePathList.SelectedItem.FullName, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                    <Image Margin="5,5,5,5" Source="{Binding ImageList.ImagePathList.SelectedItem.FullName, Converter={StaticResource StringToImageSourceConverter}}"/>
                                 </Grid>
                             </Grid>
                         </GroupBox>
@@ -532,8 +532,8 @@
                 </Grid>
 
                 <ListView Height="150" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="2"
-                                          ItemsSource="{Binding ImagePathList.Items}" 
-                                          SelectedItem="{Binding ImagePathList.SelectedItem}">
+                                          ItemsSource="{Binding ImageList.ImagePathList.Items}" 
+                                          SelectedItem="{Binding ImageList.ImagePathList.SelectedItem}">
                     <ListView.Template>
                         <ControlTemplate TargetType="{x:Type ListView}">
                             <Border BorderThickness="5">

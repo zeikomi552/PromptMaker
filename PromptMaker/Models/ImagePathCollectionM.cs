@@ -37,25 +37,29 @@ namespace PromptMaker.Models
         }
         #endregion
 
-        #region 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ
+        #region 最後のファイルパスを取得
         /// <summary>
-        /// 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ用変数
+        /// 最後のファイルパスを取得
         /// </summary>
-        string _ImagePath = string.Empty;
-        /// <summary>
-        /// 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ
-        /// </summary>
-        public string ImagePath
+        public string LastFilePath(string outdir)
         {
-            get
-            {
-                return _ImagePath;
-            }
-            set
-            {
-                _ImagePath = value;
-                NotifyPropertyChanged("ImagePath");
-            }
+            return GetLastFileInfo(outdir).FullName;
+        }
+        #endregion
+
+        #region 最終ファイルパス情報の取得
+        /// <summary>
+        /// 最終ファイルパス情報の取得
+        /// </summary>
+        public FileInfo GetLastFileInfo(string outdir)
+        {
+            // DirectoryInfoのインスタンスを生成する
+            DirectoryInfo di = new DirectoryInfo(Path.Combine(outdir, "samples"));
+
+            // ディレクトリ直下のすべてのファイル一覧を取得する
+            FileInfo[] fiAlls = di.GetFiles("*.png");
+
+            return fiAlls.Last();
         }
         #endregion
     }
