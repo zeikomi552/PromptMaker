@@ -145,9 +145,9 @@ namespace PromptMaker.Models
         public void Initialize(ParameterM param)
         {
             this.Parent = param;
-            this.MoveXPos = 0;
-            this.MoveYPos = 0;
-            this.MoveZPos = 0;
+            //this.MoveXPos = 0;
+            //this.MoveYPos = 0;
+            //this.MoveZPos = 0;
         }
         #endregion
 
@@ -264,6 +264,11 @@ namespace PromptMaker.Models
         }
         #endregion
 
-
+        public void ShiftMove()
+        {
+            var outpath = Utilities.ShiftPos(this.Parent!.InputImageOrgPath, this.MoveXPos, this.MoveYPos, this.MoveZPos);
+            this.Parent.InitFilePath = String.Empty; // 一度リセット
+            this.Parent.InitFilePath = outpath;      // 再設定
+        }
     }
 }

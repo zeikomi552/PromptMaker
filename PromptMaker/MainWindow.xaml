@@ -55,6 +55,15 @@
                         </b:Interaction.Triggers>
                     </MenuItem>
                 </MenuItem>
+                <MenuItem Header="操作">
+                    <MenuItem Header="リフレッシュ">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Click">
+                                <b:CallMethodAction TargetObject="{Binding}" MethodName="RefreshImageList"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </MenuItem>
+                </MenuItem>
             </Menu>
 
             <Grid>
@@ -284,6 +293,7 @@
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="オフセット"/>
@@ -343,10 +353,24 @@
                                         </b:Interaction.Triggers>
                                     </ToggleButton>
                                     <StackPanel Grid.Row="3" Grid.Column="0">
-                                        <TextBlock Text="繰り返し回数"/>
-                                        <TextBox Margin="5" Text="{Binding TestRepeatCount}" TextAlignment="Center"/>
+                                        <TextBlock Text="X移動量"/>
+                                        <TextBox Margin="5" Text="{Binding Parameter.ShiftPic.MoveXPos}" TextAlignment="Center"/>
                                     </StackPanel>
-
+                                    <StackPanel Grid.Row="3" Grid.Column="1">
+                                        <TextBlock Text="Y移動量"/>
+                                        <TextBox Margin="5" Text="{Binding Parameter.ShiftPic.MoveYPos}" TextAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="3" Grid.Column="2">
+                                        <TextBlock Text="Z移動量"/>
+                                        <TextBox Margin="5" Text="{Binding Parameter.ShiftPic.MoveZPos}" TextAlignment="Center"/>
+                                    </StackPanel>
+                                    <Button Margin="5" Content="動画作成" Grid.Row="4" Grid.Column="0">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="CreateMovie"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </GroupBox>
@@ -397,7 +421,7 @@
                                     </StackPanel>
                                 </Grid>
                                 <Grid Grid.Row="1">
-                                    <Image Margin="5,5,5,5" Source="{Binding ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                    <Image Margin="5,5,5,5" Source="{Binding ImagePathList.SelectedItem.FullName, Converter={StaticResource StringToImageSourceConverter}}"/>
                                 </Grid>
                             </Grid>
                         </GroupBox>
@@ -510,11 +534,6 @@
                 <ListView Height="150" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="2"
                                           ItemsSource="{Binding ImagePathList.Items}" 
                                           SelectedItem="{Binding ImagePathList.SelectedItem}">
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="SelectionChanged">
-                            <b:CallMethodAction TargetObject="{Binding}" MethodName="ImagePathSelectionChanged"/>
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
                     <ListView.Template>
                         <ControlTemplate TargetType="{x:Type ListView}">
                             <Border BorderThickness="5">

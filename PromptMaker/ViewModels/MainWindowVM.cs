@@ -34,6 +34,9 @@ using File = System.IO.File;
 using System.Security.Cryptography;
 using System.Windows.Ink;
 using MahApps.Metro.Converters;
+using System.Threading;
+using System.IO.Compression;
+using Image = System.Drawing.Image;
 
 namespace PromptMaker.ViewModels
 {
@@ -164,53 +167,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-        #region 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ
-        /// <summary>
-        /// 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ用変数
-        /// </summary>
-        string _ImagePath = string.Empty;
-        /// <summary>
-        /// 現在選択中の画像パス(アウトプット側)[ImagePath]プロパティ
-        /// </summary>
-        public string ImagePath
-        {
-            get
-            {
-                return _ImagePath;
-            }
-            set
-            {
-                _ImagePath = value;
-                NotifyPropertyChanged("ImagePath");
-            }
-        }
-        #endregion
-
-        #region テストのリピート回数[TestRepeatCount]プロパティ
-        /// <summary>
-        /// テストのリピート回数[TestRepeatCount]プロパティ用変数
-        /// </summary>
-        int _TestRepeatCount = 1;
-        /// <summary>
-        /// テストのリピート回数[TestRepeatCount]プロパティ
-        /// </summary>
-        public int TestRepeatCount
-        {
-            get
-            {
-                return _TestRepeatCount;
-            }
-            set
-            {
-                if (!_TestRepeatCount.Equals(value))
-                {
-                    _TestRepeatCount = value;
-                    NotifyPropertyChanged("TestRepeatCount");
-                }
-            }
-        }
-        #endregion
-
         #region イメージ画像リスト[ImagePathList]プロパティ
         /// <summary>
         /// イメージ画像リスト[ImagePathList]プロパティ用変数
@@ -236,7 +192,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
         #region 実行中フラグ[ExecuteF]プロパティ
         /// <summary>
         /// 実行中フラグ[ExecuteF]プロパティ用変数
@@ -261,8 +216,6 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
-
-
 
         #region 初期化処理
         /// <summary>
@@ -327,12 +280,12 @@ namespace PromptMaker.ViewModels
                    new Action(() =>
                    {
                        this.ImagePathList.Items.Clear();
-                       this.ImagePath = String.Empty;
 
                        if (fiAlls.Length > 0)
                        {
                            // 出力先ファイルパスを取得し画面表示
-                           this.Parameter.OutputFilePath = this.ImagePath = fiAlls.Last().FullName;
+                           this.Parameter.OutputFilePath = fiAlls.Last().FullName;
+                           this.ImagePathList.SelectedItem = fiAlls.Last();
 
                            // ファイルリストの表示
                            this.ImagePathList.Items = new System.Collections.ObjectModel.ObservableCollection<FileInfo>(fiAlls);
@@ -399,10 +352,10 @@ namespace PromptMaker.ViewModels
             try
             {
                 // ファイルが選択されていてファイルパスが存在する場合
-                if (!string.IsNullOrEmpty(this.ImagePath) && File.Exists(this.ImagePath))
+                if (this.ImagePathList.SelectedItem != null && File.Exists(this.ImagePathList.SelectedItem.FullName))
                 {
-                    string str = Path.GetDirectoryName(this.ImagePath)!;
-                    Process.Start("explorer.exe", string.Format(@"/select,""{0}", this.ImagePath)); // エクスプローラを開く
+                    string str = Path.GetDirectoryName(this.ImagePathList.SelectedItem.FullName)!;
+                    Process.Start("explorer.exe", string.Format(@"/select,""{0}", this.ImagePathList.SelectedItem.FullName)); // エクスプローラを開く
                 }
             }
             catch (Exception ex)
@@ -423,9 +376,9 @@ namespace PromptMaker.ViewModels
             try
             {
                 // ファイルが選択されていてファイルパスが存在する場合
-                if (!string.IsNullOrEmpty(this.ImagePath) && File.Exists(this.ImagePath))
+                if (!string.IsNullOrEmpty(this.ImagePathList.SelectedItem.FullName) && File.Exists(this.ImagePathList.SelectedItem.FullName))
                 {
-                    Process.Start("mspaint", this.ImagePath); // 指定したファイルを開く
+                    Process.Start("mspaint", this.ImagePathList.SelectedItem.FullName); // 指定したファイルを開く
                 }
             }
             catch (Exception ex)
@@ -441,7 +394,10 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                ExecuteRealESRGAN(this.ImagePath);
+                if (this.ImagePathList.SelectedItem != null && File.Exists(this.ImagePathList.SelectedItem.FullName))
+                {
+                    ExecuteRealESRGAN(this.ImagePathList.SelectedItem.FullName);
+                }
             }
             catch (Exception ex)
             {
@@ -473,7 +429,10 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                this.Parameter.ExecuteGFPGAN(this.ImagePath);
+                if (this.ImagePathList.SelectedItem != null && File.Exists(this.ImagePathList.SelectedItem.FullName))
+                {
+                    this.Parameter.ExecuteGFPGAN(this.ImagePathList.SelectedItem.FullName);
+                }
             }
             catch (Exception ex)
             {
@@ -490,13 +449,26 @@ namespace PromptMaker.ViewModels
         {
             get
             {
+                return GetLastFileInfo.FullName;
+            }
+        }
+        #endregion
+
+        #region 最終ファイルパス情報の取得
+        /// <summary>
+        /// 最終ファイルパス情報の取得
+        /// </summary>
+        private FileInfo GetLastFileInfo
+        {
+            get
+            {
                 // DirectoryInfoのインスタンスを生成する
                 DirectoryInfo di = new DirectoryInfo(Path.Combine(this.Parameter.Outdir, "samples"));
 
                 // ディレクトリ直下のすべてのファイル一覧を取得する
                 FileInfo[] fiAlls = di.GetFiles("*.png");
 
-                return fiAlls.Last().FullName;
+                return fiAlls.Last();
             }
         }
         #endregion
@@ -526,6 +498,7 @@ namespace PromptMaker.ViewModels
 
         private void AutoTestForMoveBackward(object sender, EventArgs ev, int retry =10)
         {
+
             // プロンプトの有効数確認
             var enable_prompt_count = (from x in this.PromptComposerConf.Item.Items
                        where x.IsEnable == true
@@ -534,59 +507,68 @@ namespace PromptMaker.ViewModels
             // 有効になってるものが無い場合処理を実行しない
             if(enable_prompt_count <= 0)
                 return;
-            
 
-            string img_path = this.ImagePath;
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(img_path);
- 
-            // 後ろへ移動
-            this.Parameter.ShiftPic.ShiftForward();
+            //if (_rand.Next(0, 100) % 100 == 0)
+            //{
+            //    this.Parameter.Strength = (decimal)0.75;
+            //}
+            //else
+            //{
+            //this.Parameter.Strength = (decimal)0.35;
+            //}
 
-            // 右へ移動
-            this.Parameter.ShiftPic.ShiftLeft();
+            if (this.ImagePathList.SelectedItem != null && File.Exists(this.ImagePathList.SelectedItem.FullName))
+            {
+                string img_path = this.ImagePathList.SelectedItem.FullName;
 
-            // 下へ移動
-            this.Parameter.ShiftPic.ShiftUp();
+                // 初期ファイルの設定
+                this.Parameter.SetInitFile(img_path);
 
-            // StableDiffusion実行
-            this.Parameter.Execute(sender, ev);
 
-            // 不要ファイルを削除
-            DeleteFile();
+                // 指定場所に移動
+                this.Parameter.ShiftPic.ShiftMove();
 
-            // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = img_path = LastFilePath;
+                string last = this.LastFilePath;
 
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(img_path);
+                // StableDiffusion実行
+                this.Parameter.Execute(sender, ev);
 
-            // RealESRGANの実行
-            ExecuteRealESRGAN(img_path);
+                // 不要ファイルを削除
+                DeleteFile();
 
-            // ファイル名の変更と上書き
-            Utilities.FileMove(this.LastFilePath, img_path, true);
+                // 出力先ファイルパスを取得し画面表示
+                this.Parameter.OutputFilePath = img_path = LastFilePath;
 
-            // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = img_path = this.LastFilePath;
+                // 初期ファイルの設定
+                this.Parameter.SetInitFile(img_path);
 
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(img_path);
+                //// RealESRGANの実行
+                //ExecuteRealESRGAN(img_path);
 
-            // サイズ縮小
-            Utilities.ResizePic(img_path, this.Parameter.Width, this.Parameter.Height);
+                //// ファイル名の変更と上書き
+                //Utilities.FileMove(this.LastFilePath, img_path, true);
 
-            // 出力先ファイルパスを取得し画面表示
-            this.Parameter.OutputFilePath = img_path = this.LastFilePath;
+                // 出力先ファイルパスを取得し画面表示
+                this.Parameter.OutputFilePath = img_path = this.LastFilePath;
 
-            // 初期ファイルの設定
-            this.Parameter.SetInitFile(img_path);
+                // 初期ファイルの設定
+                this.Parameter.SetInitFile(img_path);
 
-            // 最後の画像をセット
-            this.ImagePath = this.LastFilePath;
+                // サイズ縮小
+                Utilities.ResizePic(img_path, this.Parameter.Width, this.Parameter.Height);
 
-            // イメージリストの更新
-            RefreshImageList();
+                // 出力先ファイルパスを取得し画面表示
+                this.Parameter.OutputFilePath = img_path = this.LastFilePath;
+
+                // 初期ファイルの設定
+                this.Parameter.SetInitFile(img_path);
+
+                // 最後の画像をセット
+                this.ImagePathList.SelectedItem = this.GetLastFileInfo;
+
+                // イメージリストの更新
+                RefreshImageList();
+            }
         }
 
         /// <summary>
@@ -618,8 +600,6 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                int max = this.TestRepeatCount;
-
                 Task.Run(() =>
                 {
                     try
@@ -669,11 +649,11 @@ namespace PromptMaker.ViewModels
                         FileSystem.DeleteFile(file_info.FullName, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         if (index >= 1)
                         {
-                            this.ImagePath = this.ImagePathList.ElementAt(index - 1).FullName;
+                            this.ImagePathList.SelectedItem = this.GetLastFileInfo;
                         }
                         else
                         {
-                            this.ImagePath = String.Empty;
+                            this.ImagePathList.SelectedItem = null;
                         }
                     }
                 }
@@ -694,7 +674,7 @@ namespace PromptMaker.ViewModels
         {
             try
             {
-                this.Parameter.SetInitFile(this.ImagePath);
+                this.Parameter.SetInitFile(this.ImagePathList.SelectedItem.FullName);
             }
             catch (Exception ex)
             {
@@ -702,32 +682,6 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
-
-        #region 画像パスの選択変更
-        /// <summary>
-        /// 画像パスの選択変更
-        /// </summary>
-        public void ImagePathSelectionChanged()
-        {
-            try
-            {
-                // nullチェック
-                if (this.ImagePathList.SelectedItem != null)
-                {
-                    this.ImagePath = this.ImagePathList.SelectedItem.FullName;
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
-        
-
-
-
 
         #region プロンプトリストの保存処理
         /// <summary>
@@ -949,5 +903,53 @@ namespace PromptMaker.ViewModels
             }
         }
         #endregion
+
+        public void CreateMovie()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new SaveFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "動画ファイル (*.mp4)|*.mp4";
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    var outdir = Path.Combine(this.Parameter.Outdir, "Sample");
+                    var Converter = new ImageConverter();
+                    //H264を使う場合、openh264-*.dllが必要。このdllをソフトウェアと同一のフォルダに入れる。
+                    using (var Writer = new OpenCvSharp.VideoWriter(dialog.FileName, OpenCvSharp.FourCC.H264, 20, new OpenCvSharp.Size(this.Parameter.Width, this.Parameter.Height)))
+                    {
+                        // ディレクトリパス
+                        string path = this.Parameter.Outdir;
+
+                        // サンプルフォルダ配下
+                        path = Path.Combine(path, "samples");
+
+                        PathManager.CreateDirectory(path);
+
+                        // DirectoryInfoのインスタンスを生成する
+                        DirectoryInfo di = new DirectoryInfo(path);
+
+                        // ディレクトリ直下のすべてのファイル一覧を取得する
+                        FileInfo[] fiAlls = di.GetFiles("*.png");
+
+                        foreach (var file in fiAlls)
+                        {
+                            //var image = OpenCvSharp.Mat.FromStream(Entry.Open(),OpenCvSharp.ImreadModes.Color);本当はこれを使いたい
+                            var image = OpenCvSharp.Mat.FromImageData((byte[])Converter.ConvertTo(Image.FromFile(file.FullName), typeof(byte[])));
+                            Writer.Write(image);
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
     }
 }
