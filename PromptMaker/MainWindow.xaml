@@ -72,6 +72,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
+
                 <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -83,7 +84,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Width="60" TextAlignment="Right" VerticalAlignment="Center" Margin="5" Text="Prompt"/>
                         <TextBlock VerticalAlignment="Center" Grid.Column="1" Margin="5" Text=":"/>
-                        <TextBox Height="50" Grid.Column="2" Margin="5" VerticalAlignment="Center" AcceptsReturn="True" Text="{Binding Parameter.Prompt}" VerticalScrollBarVisibility="Auto"/>
+                        <TextBox Grid.Column="2" Margin="5" VerticalAlignment="Center" AcceptsReturn="True" Text="{Binding Parameter.Prompt}" VerticalScrollBarVisibility="Auto"/>
                         <Button Margin="5" Content="プロンプト作成" Grid.Column="3" Cursor="Hand">
                             <b:Interaction.Triggers>
                                 <b:EventTrigger EventName="Click">
@@ -95,6 +96,24 @@
                             <b:Interaction.Triggers>
                                 <b:EventTrigger EventName="Click">
                                     <b:CallMethodAction TargetObject="{Binding}" MethodName="AddList"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </Button>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" Text="最後のコマンド"/>
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" Text=":" Grid.Column="1"/>
+                        <TextBox IsReadOnly="True" VerticalAlignment="Center" Margin="5" Text="{Binding Parameter.CommandBackup}" Grid.Column="2"/>
+                        <Button Margin="5" Grid.Column="3" Content="Copy">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Click">
+                                    <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="LastCommandCopy"/>
                                 </b:EventTrigger>
                             </b:Interaction.Triggers>
                         </Button>
@@ -118,18 +137,15 @@
                 </StackPanel>
 
                 <Grid Grid.Row="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="2*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="380"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
                         <GroupBox Margin="5" Header="プロンプト補助リスト">
                             <Grid>
@@ -213,34 +229,134 @@
                                 </Grid>
                             </Grid>
                         </GroupBox>
-                        <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
-                        <GridSplitter Background="AliceBlue" Width="3" Grid.Column="2" HorizontalAlignment="Right"/>
 
-                        <!--<GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">-->
-                        <GroupBox Grid.Column="1" Margin="5,5,5,5" Header="インプット">
+                        <GridSplitter VerticalAlignment="Bottom" Background="AliceBlue" Height="3" HorizontalAlignment="Stretch"/>
 
-                            <Grid MinWidth="200">
+                        <GroupBox Margin="5" Grid.Row="1" Header="パラメーター">
+                            <Grid>
+                                <ScrollViewer>
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock TextAlignment="Right" Width="80" Text="幅" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Width}" 
+                                            Minimum="128" Maximum="2048" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
+                                            <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Width}" VerticalAlignment="Center" Margin="5"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock TextAlignment="Right" Width="80" Text="高さ" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Height}" 
+                                            Minimum="128" Maximum="2048" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
+                                            <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Height}" VerticalAlignment="Center" Margin="5"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="シード値(乱数発生方法) 0ならランダムで選ばれる。" TextAlignment="Right" Width="80" Text="シード" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Seed}" 
+                                            Minimum="0" Maximum="999999" Width="100" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="1" TickFrequency="1"/>
+                                            <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Seed}" VerticalAlignment="Center" Margin="5"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="DDIMステップ数 AIが生成する画像の精度" TextAlignment="Right" Width="80" Text="ステップ" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Ddim_steps}" 
+                                            Minimum="0" Maximum="1000" Width="100" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="1" TickFrequency="1"/>
+                                            <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Ddim_steps}" VerticalAlignment="Center" Margin="5"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="0～1の間で指定。1に近づくと多数のバリエーションが出現しやすくなる。" TextAlignment="Right" Width="80" Text="ストレングス" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Strength}" 
+                                            Minimum="0" Maximum="0.99" Width="100" IsSnapToTickEnabled="True" SmallChange="0.01" LargeChange="0.01" TickFrequency="0.01"/>
+                                            <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Strength}" VerticalAlignment="Center" Margin="5"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="プロンプトへの順守レベル。7～8.5が推奨値。数字を大きくすると、プロンプトをより尊重した画像が作られる。" TextAlignment="Right" Width="80" Text="ガイダンススケール" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Guidance_Scale}" 
+                                            Minimum="0" Maximum="20" Width="100" IsSnapToTickEnabled="True" SmallChange="0.1" LargeChange="0.1" TickFrequency="0.1"/>
+                                            <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Guidance_Scale}" VerticalAlignment="Center" Margin="5"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="作成回数" TextAlignment="Right" Width="80" Text="作成回数" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.N_iter}" 
+                                            Minimum="1" Maximum="20" Width="100" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="1" TickFrequency="1"/>
+                                            <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.N_iter}" VerticalAlignment="Center" Margin="5"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="use plms sampling"
+                                                   TextAlignment="Right" Width="90" Text="plms" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.UsePlms}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="モデル"
+                                                   TextAlignment="Right" Width="90" Text="CKPTファイル" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBox VerticalAlignment="Center" Width="150" Text="{Binding Parameter.CkptPath}"/>
+                                            <Button Margin="5" Content="ファイル">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenCkptFile"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                            </Button>
+                                        </StackPanel>
+
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="出力先ディレクトリ"
+                                                   TextAlignment="Right" Width="90" Text="出力先" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBox VerticalAlignment="Center" Width="150" Text="{Binding Parameter.Outdir}"/>
+                                            <Button Margin="5" Content="フォルダ">
+                                                <b:Interaction.Triggers>
+                                                    <b:EventTrigger EventName="Click">
+                                                        <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenOutDir"/>
+                                                    </b:EventTrigger>
+                                                </b:Interaction.Triggers>
+                                            </Button>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="大きいサイズを作成したい場合に使用する、ただし処理は遅い"
+                                                   TextAlignment="Right" Width="90" Text="大きいサイズ用" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.HugeSizeF}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+
+                        </GroupBox>
+
+                    </Grid>
+                    <GridSplitter Background="AliceBlue" Width="3" Grid.Column="0" HorizontalAlignment="Right"/>
+
+                    <Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <GroupBox Margin="5,5,5,5" Header="インプット"
+                                  Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}">
+                            <!--<GroupBox Margin="5,5,5,5" Header="インプット">-->
+
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
+
                                 </Grid.RowDefinitions>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Width="60" VerticalAlignment="Center" TextAlignment="Right" Margin="5" Text="初期画像:"/>
-                                    <Button Margin="5" Grid.Column="1" Content="ファイル" Width="100">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Margin="5" Grid.Column="2" Content="インプット" Width="100">
                                         <b:Interaction.Triggers>
                                             <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenInitFile"/>
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="MoveImg2Img"/>
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
@@ -251,10 +367,11 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
-
-                                </Grid>
-                                <Grid Grid.Row="2">
-                                    <Image x:Name="image" Grid.Row="1" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                </StackPanel>
+                                <Grid Grid.Row="1">
+                                    <Image Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}" Width="{Binding Source.Width, RelativeSource={RelativeSource Self}}"
+                                           Height="{Binding Source.Height, RelativeSource={RelativeSource Self}}"
+                                           x:Name="image" Grid.Row="1" Margin="5" Source="{Binding Parameter.InitFilePath, Converter={StaticResource StringToImageSourceConverter}}"/>
                                     <!--<Border BorderBrush="Black"
                                             Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}" 
                                             Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}" Background="#7F000000"/>-->
@@ -266,7 +383,7 @@
                                             <DrawingAttributes Color="#FFFFFF" Width="20" Height="20"/>
                                         </InkCanvas.DefaultDrawingAttributes>
                                         <InkCanvas.Style>
-                                            <Style TargetType="InkCanvas">
+                                            <Style TargetType="{x:Type InkCanvas}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Parameter.Img2ImgF}" Value="true">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -282,7 +399,7 @@
                                         </InkCanvas.Style>
                                     </InkCanvas>
                                 </Grid>
-                                <Grid Grid.Row="3">
+                                <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
@@ -331,7 +448,7 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
-                                    <Button Margin="5" Content="手前" Grid.Row="2">
+                                    <Button Margin="5" Content="前" Grid.Row="2">
                                         <b:Interaction.Triggers>
                                             <b:EventTrigger EventName="Click">
                                                 <b:CallMethodAction TargetObject="{Binding Parameter.ShiftPic}" MethodName="ShiftForward"/>
@@ -364,16 +481,12 @@
                                         <TextBlock Text="Z移動量"/>
                                         <TextBox Margin="5" Text="{Binding Parameter.ShiftPic.MoveZPos}" TextAlignment="Center"/>
                                     </StackPanel>
-                                    <Button Margin="5" Content="動画作成" Grid.Row="4" Grid.Column="0">
-                                        <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Click">
-                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="CreateMovie"/>
-                                            </b:EventTrigger>
-                                        </b:Interaction.Triggers>
-                                    </Button>
+
                                 </Grid>
                             </Grid>
                         </GroupBox>
+
+                        <GridSplitter Background="AliceBlue" Width="3" HorizontalAlignment="Right"/>
 
                         <GroupBox MinWidth="100" Grid.Column="2" Margin="5,5,5,5" Header="アウトプット">
                             <Grid>
@@ -383,20 +496,6 @@
                                 </Grid.RowDefinitions>
                                 <Grid>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Margin="5" Grid.Column="1" Content="ファイル" Width="100">
-                                            <b:Interaction.Triggers>
-                                                <b:EventTrigger EventName="Click">
-                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="FileOpen"/>
-                                                </b:EventTrigger>
-                                            </b:Interaction.Triggers>
-                                        </Button>
-                                        <Button Margin="5" Grid.Column="1" Content="フォルダ" Width="100">
-                                            <b:Interaction.Triggers>
-                                                <b:EventTrigger EventName="Click">
-                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="FolderOpen"/>
-                                                </b:EventTrigger>
-                                            </b:Interaction.Triggers>
-                                        </Button>
                                         <Button Margin="5" Grid.Column="1" Content="ESRGAN" Width="100">
                                             <b:Interaction.Triggers>
                                                 <b:EventTrigger EventName="Click">
@@ -411,215 +510,122 @@
                                                 </b:EventTrigger>
                                             </b:Interaction.Triggers>
                                         </Button>
-                                        <Button Margin="5" Grid.Column="2" Content="インプット" Width="100" Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}" Cursor="Hand">
+
+                                        <Button Margin="5" Content="動画作成" Grid.Row="4" Grid.Column="0">
                                             <b:Interaction.Triggers>
                                                 <b:EventTrigger EventName="Click">
-                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="MoveImg2Img"/>
+                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="CreateMovie"/>
                                                 </b:EventTrigger>
                                             </b:Interaction.Triggers>
                                         </Button>
                                     </StackPanel>
                                 </Grid>
                                 <Grid Grid.Row="1">
-                                    <Image Margin="5,5,5,5" Source="{Binding ImageList.ImagePathList.SelectedItem.FullName, Converter={StaticResource StringToImageSourceConverter}}"/>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="150"/>
+                                    </Grid.RowDefinitions>
+                                    <Image Margin="5,5,5,5" Source="{Binding ImageList.ImagePathList.SelectedItem.FullName, Converter={StaticResource StringToImageSourceConverter}}"
+                                           Width="{Binding Source.Width, RelativeSource={RelativeSource Self}}"
+                                           Height="{Binding Source.Height, RelativeSource={RelativeSource Self}}"/>
+
+                                    <ListView ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Row="1"
+                                          ItemsSource="{Binding ImageList.ImagePathList.Items}" 
+                                          SelectedItem="{Binding ImageList.ImagePathList.SelectedItem}">
+                                        <ListView.Template>
+                                            <ControlTemplate TargetType="{x:Type ListView}">
+                                                <Border BorderThickness="5">
+                                                    <ScrollViewer>
+                                                        <ItemsPresenter Margin="5" />
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ListView.Template>
+                                        <ListView.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ListView.ItemsPanel>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <Image Width="100" Source="{Binding FullName, Converter={StaticResource StringToImageSourceConverter}}" >
+                                                        <Image.ContextMenu>
+                                                            <ContextMenu>
+                                                                <MenuItem Header="フォルダを開く">
+                                                                    <b:Interaction.Triggers>
+                                                                        <b:EventTrigger EventName="Click">
+                                                                            <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm} ,Path=ImageList}" MethodName="FolderOpen"/>
+                                                                        </b:EventTrigger>
+                                                                    </b:Interaction.Triggers>
+                                                                </MenuItem>
+                                                                <MenuItem Header="ファイルを開く">
+                                                                    <b:Interaction.Triggers>
+                                                                        <b:EventTrigger EventName="Click">
+                                                                            <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}, Path=ImageList}" MethodName="FileOpen"/>
+                                                                        </b:EventTrigger>
+                                                                    </b:Interaction.Triggers>
+                                                                </MenuItem>
+                                                                <MenuItem Header="高画質化(Real-ESRGAN)">
+                                                                    <b:Interaction.Triggers>
+                                                                        <b:EventTrigger EventName="Click">
+                                                                            <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="ExecuteRealESRGAN"/>
+                                                                        </b:EventTrigger>
+                                                                    </b:Interaction.Triggers>
+                                                                </MenuItem>
+                                                                <MenuItem Header="高画質化(GFPGAN)">
+                                                                    <b:Interaction.Triggers>
+                                                                        <b:EventTrigger EventName="Click">
+                                                                            <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="ExecuteGFPGAN"/>
+                                                                        </b:EventTrigger>
+                                                                    </b:Interaction.Triggers>
+                                                                </MenuItem>
+                                                                <MenuItem Header="インプットへ">
+                                                                    <b:Interaction.Triggers>
+                                                                        <b:EventTrigger EventName="Click">
+                                                                            <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="MoveImg2Img"/>
+                                                                        </b:EventTrigger>
+                                                                    </b:Interaction.Triggers>
+                                                                    <MenuItem.Style>
+                                                                        <Style TargetType="MenuItem">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Parameter.Img2ImgF, Source={StaticResource vm}}" Value="true">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Parameter.Txt2ImgF, Source={StaticResource vm}}" Value="true">
+                                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Parameter.InpaintF, Source={StaticResource vm}}" Value="true">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </MenuItem.Style>
+                                                                </MenuItem>
+                                                                <MenuItem Header="ファイルをゴミ箱へ">
+                                                                    <b:Interaction.Triggers>
+                                                                        <b:EventTrigger EventName="Click">
+                                                                            <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FileDelete"/>
+                                                                        </b:EventTrigger>
+                                                                    </b:Interaction.Triggers>
+                                                                </MenuItem>
+                                                            </ContextMenu>
+                                                        </Image.ContextMenu>
+                                                    </Image>
+                                                    <TextBlock HorizontalAlignment="Center" Text="{Binding FullName, Converter={StaticResource FileFullName2FileNameConverter}}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+
+                                    </ListView>
+
                                 </Grid>
                             </Grid>
                         </GroupBox>
-
-                        <GroupBox Grid.Column="3" Margin="5,5,5,5" Header="パラメーター">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock TextAlignment="Right" Width="80" Text="幅" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Width}" 
-                                            Minimum="128" Maximum="2048" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
-                                        <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Width}" VerticalAlignment="Center" Margin="5"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock TextAlignment="Right" Width="80" Text="高さ" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Height}" 
-                                            Minimum="128" Maximum="2048" Width="100" IsSnapToTickEnabled="True" SmallChange="64" LargeChange="64" TickFrequency="64"/>
-                                        <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Height}" VerticalAlignment="Center" Margin="5"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="シード値(乱数発生方法) 0ならランダムで選ばれる。" TextAlignment="Right" Width="80" Text="シード" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Seed}" 
-                                            Minimum="0" Maximum="999999" Width="100" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="1" TickFrequency="1"/>
-                                        <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Seed}" VerticalAlignment="Center" Margin="5"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="DDIMステップ数 AIが生成する画像の精度" TextAlignment="Right" Width="80" Text="ステップ" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Ddim_steps}" 
-                                            Minimum="0" Maximum="1000" Width="100" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="1" TickFrequency="1"/>
-                                        <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Ddim_steps}" VerticalAlignment="Center" Margin="5"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="0～1の間で指定。1に近づくと多数のバリエーションが出現しやすくなる。" TextAlignment="Right" Width="80" Text="ストレングス" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Strength}" 
-                                            Minimum="0" Maximum="0.99" Width="100" IsSnapToTickEnabled="True" SmallChange="0.01" LargeChange="0.01" TickFrequency="0.01"/>
-                                        <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Strength}" VerticalAlignment="Center" Margin="5"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="プロンプトへの順守レベル。7～8.5が推奨値。数字を大きくすると、プロンプトをより尊重した画像が作られる。" TextAlignment="Right" Width="80" Text="ガイダンススケール" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.Guidance_Scale}" 
-                                            Minimum="0" Maximum="20" Width="100" IsSnapToTickEnabled="True" SmallChange="0.1" LargeChange="0.1" TickFrequency="0.1"/>
-                                        <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.Guidance_Scale}" VerticalAlignment="Center" Margin="5"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="作成回数" TextAlignment="Right" Width="80" Text="作成回数" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <Slider VerticalAlignment="Center" Margin="5" Value="{Binding Parameter.N_iter}" 
-                                            Minimum="1" Maximum="20" Width="100" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="1" TickFrequency="1"/>
-                                        <TextBox Width="50" TextAlignment="Center" Text="{Binding Parameter.N_iter}" VerticalAlignment="Center" Margin="5"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="use plms sampling"
-                                                   TextAlignment="Right" Width="90" Text="plms" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.UsePlms}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="モデル"
-                                                   TextAlignment="Right" Width="90" Text="CKPTファイル" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBox VerticalAlignment="Center" Width="150" Text="{Binding Parameter.CkptPath}"/>
-                                        <Button Margin="5" Content="ファイル">
-                                            <b:Interaction.Triggers>
-                                                <b:EventTrigger EventName="Click">
-                                                    <b:CallMethodAction TargetObject="{Binding Parameter}" MethodName="OpenCkptFile"/>
-                                                </b:EventTrigger>
-                                            </b:Interaction.Triggers>
-                                        </Button>
-                                    </StackPanel>
-
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="出力先ディレクトリ"
-                                                   TextAlignment="Right" Width="90" Text="出力先" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBox VerticalAlignment="Center" Width="150" Text="{Binding Parameter.Outdir}"/>
-                                        <Button Margin="5" Content="フォルダ">
-                                            <b:Interaction.Triggers>
-                                                <b:EventTrigger EventName="Click">
-                                                    <b:CallMethodAction TargetObject="{Binding}" MethodName="OpenOutDir"/>
-                                                </b:EventTrigger>
-                                            </b:Interaction.Triggers>
-                                        </Button>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock ToolTip="大きいサイズを作成したい場合に使用する、ただし処理は遅い"
-                                                   TextAlignment="Right" Width="90" Text="大きいサイズ用" VerticalAlignment="Center" Margin="5"/>
-                                        <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
-                                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.HugeSizeF}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
-
-                        </GroupBox>
                     </Grid>
+
                 </Grid>
 
-                <ListView Height="150" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="2"
-                                          ItemsSource="{Binding ImageList.ImagePathList.Items}" 
-                                          SelectedItem="{Binding ImageList.ImagePathList.SelectedItem}">
-                    <ListView.Template>
-                        <ControlTemplate TargetType="{x:Type ListView}">
-                            <Border BorderThickness="5">
-                                <ScrollViewer>
-                                    <ItemsPresenter Margin="5" />
-                                </ScrollViewer>
-                            </Border>
-                        </ControlTemplate>
-                    </ListView.Template>
-                    <ListView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ListView.ItemsPanel>
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <Image Width="100" Source="{Binding FullName, Converter={StaticResource StringToImageSourceConverter}}" >
-                                    <Image.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="フォルダを開く">
-                                                <b:Interaction.Triggers>
-                                                    <b:EventTrigger EventName="Click">
-                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FolderOpen"/>
-                                                    </b:EventTrigger>
-                                                </b:Interaction.Triggers>
-                                            </MenuItem>
-                                            <MenuItem Header="ファイルを開く">
-                                                <b:Interaction.Triggers>
-                                                    <b:EventTrigger EventName="Click">
-                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FileOpen"/>
-                                                    </b:EventTrigger>
-                                                </b:Interaction.Triggers>
-                                            </MenuItem>
-                                            <MenuItem Header="高画質化(Real-ESRGAN)">
-                                                <b:Interaction.Triggers>
-                                                    <b:EventTrigger EventName="Click">
-                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="ExecuteRealESRGAN"/>
-                                                    </b:EventTrigger>
-                                                </b:Interaction.Triggers>
-                                            </MenuItem>
-                                            <MenuItem Header="高画質化(GFPGAN)">
-                                                <b:Interaction.Triggers>
-                                                    <b:EventTrigger EventName="Click">
-                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="ExecuteGFPGAN"/>
-                                                    </b:EventTrigger>
-                                                </b:Interaction.Triggers>
-                                            </MenuItem>
-                                            <MenuItem Header="インプットへ">
-                                                <b:Interaction.Triggers>
-                                                    <b:EventTrigger EventName="Click">
-                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="MoveImg2Img"/>
-                                                    </b:EventTrigger>
-                                                </b:Interaction.Triggers>
-                                                <MenuItem.Style>
-                                                    <Style TargetType="MenuItem">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Parameter.Img2ImgF, Source={StaticResource vm}}" Value="true">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Parameter.Txt2ImgF, Source={StaticResource vm}}" Value="true">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Parameter.InpaintF, Source={StaticResource vm}}" Value="true">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </MenuItem.Style>
-                                            </MenuItem>
-                                            <MenuItem Header="ファイルをゴミ箱へ">
-                                                <b:Interaction.Triggers>
-                                                    <b:EventTrigger EventName="Click">
-                                                        <b:CallMethodAction TargetObject="{Binding Source={StaticResource vm}}" MethodName="FileDelete"/>
-                                                    </b:EventTrigger>
-                                                </b:Interaction.Triggers>
-                                            </MenuItem>
-                                        </ContextMenu>
-                                    </Image.ContextMenu>
-                                </Image>
-                                <TextBlock HorizontalAlignment="Center" Text="{Binding FullName, Converter={StaticResource FileFullName2FileNameConverter}}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-
-                </ListView>
 
             </Grid>
         </DockPanel>

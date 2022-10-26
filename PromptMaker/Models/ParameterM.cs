@@ -846,7 +846,8 @@ namespace PromptMaker.Models
                 command.AppendLine($"--strength {this.Strength}");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
                 command.AppendLine($"--model-id");
-                command.AppendLine($"\"CompVis/stable-diffusion-v1-4\"");
+                //command.AppendLine($"\"CompVis/stable-diffusion-v1-4\"");
+                command.AppendLine($"\"runwayml/stable-diffusion-v1-5\"");
                 command.AppendLine($"--accesstoken \"{this.SettingConf.Item.AccessToken}\"");
                 command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
                 return command.ToString().Replace("\r\n", " ");
@@ -1173,8 +1174,7 @@ namespace PromptMaker.Models
                 {
                     sw.WriteLine($"--------");
                     sw.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
-                    sw.WriteLine($"Prompt->{this.Prompt}");
-                    sw.WriteLine($"Command->{this.Command}");
+                    sw.WriteLine($"Command->{this.CommandBackup}");
                 }
 
                 // コマンドの実行処理
@@ -1265,6 +1265,24 @@ namespace PromptMaker.Models
 
                 // イメージリストの更新
                 this.Parent!.RefreshImageList();
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        #region クリップボードに文字列をコピーする
+        /// <summary>
+        /// クリップボードに文字列をコピーする
+        /// </summary>
+        public void LastCommandCopy()
+        {
+            try
+            {
+                //クリップボードに文字列をコピーする
+                Clipboard.SetText(this.CommandBackup);
             }
             catch (Exception ex)
             {

@@ -192,8 +192,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
-
         #region 実行中フラグ[ExecuteF]プロパティ
         /// <summary>
         /// 実行中フラグ[ExecuteF]プロパティ用変数
@@ -343,54 +341,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-        #region フォルダを開く処理
-        /// <summary>
-        /// フォルダを開く処理
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="ev"></param>
-        public void FolderOpen(object sender, EventArgs ev)
-        {
-            try
-            {
-                // ファイルが選択されていてファイルパスが存在する場合
-                if (this.ImageList.ImagePathList.SelectedItem != null && File.Exists(this.ImageList.ImagePathList.SelectedItem.FullName))
-                {
-                    string str = Path.GetDirectoryName(this.ImageList.ImagePathList.SelectedItem.FullName)!;
-                    Process.Start("explorer.exe", string.Format(@"/select,""{0}", this.ImageList.ImagePathList.SelectedItem.FullName)); // エクスプローラを開く
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-        #endregion
-
-        #region ファイルを開く処理
-        /// <summary>
-        /// ファイルを開く処理
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="ev"></param>
-        public void FileOpen(object sender, EventArgs ev)
-        {
-            try
-            {
-                // ファイルが選択されていてファイルパスが存在する場合
-                if (!string.IsNullOrEmpty(this.ImageList.ImagePathList.SelectedItem.FullName) && File.Exists(this.ImageList.ImagePathList.SelectedItem.FullName))
-                {
-                    Process.Start("mspaint", this.ImageList.ImagePathList.SelectedItem.FullName); // 指定したファイルを開く
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowErrorOK(ex.Message, "Error");
-            }
-        }
-
-        #endregion
-
         #region ESRGANの実行処理
         public void ExecuteRealESRGAN()
         {
@@ -443,7 +393,6 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
-
         #region ファイルの削除処理
         /// <summary>
         /// ファイルの削除処理
@@ -479,15 +428,6 @@ namespace PromptMaker.ViewModels
             if(enable_prompt_count <= 0)
                 return;
 
-            //if (_rand.Next(0, 100) % 100 == 0)
-            //{
-            //    this.Parameter.Strength = (decimal)0.75;
-            //}
-            //else
-            //{
-            //this.Parameter.Strength = (decimal)0.35;
-            //}
-
             if (this.ImageList.ImagePathList.SelectedItem != null && File.Exists(this.ImageList.ImagePathList.SelectedItem.FullName))
             {
                 string img_path = this.ImageList.ImagePathList.SelectedItem.FullName;
@@ -499,7 +439,7 @@ namespace PromptMaker.ViewModels
                 // 指定場所に移動
                 this.Parameter.ShiftPic.ShiftMove();
 
-                string last = this.ImageList.LastFilePath(this.Parameter.Outdir);
+                string last = this.ImageList.GetLastFilePath(this.Parameter.Outdir);
 
                 // StableDiffusion実行
                 this.Parameter.Execute(sender, ev);
@@ -508,19 +448,13 @@ namespace PromptMaker.ViewModels
                 DeleteFile();
 
                 // 出力先ファイルパスを取得し画面表示
-                this.Parameter.OutputFilePath = img_path = this.ImageList.LastFilePath(this.Parameter.Outdir);
+                this.Parameter.OutputFilePath = img_path = this.ImageList.GetLastFilePath(this.Parameter.Outdir);
 
                 // 初期ファイルの設定
                 this.Parameter.SetInitFile(img_path);
 
-                //// RealESRGANの実行
-                //ExecuteRealESRGAN(img_path);
-
-                //// ファイル名の変更と上書き
-                //Utilities.FileMove(this.LastFilePath, img_path, true);
-
                 // 出力先ファイルパスを取得し画面表示
-                this.Parameter.OutputFilePath = img_path = this.ImageList.LastFilePath(this.Parameter.Outdir);
+                this.Parameter.OutputFilePath = img_path = this.ImageList.GetLastFilePath(this.Parameter.Outdir);
 
                 // 初期ファイルの設定
                 this.Parameter.SetInitFile(img_path);
@@ -529,7 +463,7 @@ namespace PromptMaker.ViewModels
                 Utilities.ResizePic(img_path, this.Parameter.Width, this.Parameter.Height);
 
                 // 出力先ファイルパスを取得し画面表示
-                this.Parameter.OutputFilePath = img_path = this.ImageList.LastFilePath(this.Parameter.Outdir);
+                this.Parameter.OutputFilePath = img_path = this.ImageList.GetLastFilePath(this.Parameter.Outdir);
 
                 // 初期ファイルの設定
                 this.Parameter.SetInitFile(img_path);
@@ -613,19 +547,14 @@ namespace PromptMaker.ViewModels
                 {
                     var file_info = tmp.DataContext as FileInfo;
 
+                    // nullチェック
                     if (file_info != null)
                     {
-                        var index = this.ImageList.ImagePathList.Items.IndexOf(file_info);
-                        this.ImageList.ImagePathList.Items.Remove(file_info);
-                        FileSystem.DeleteFile(file_info.FullName, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                        if (index >= 1)
-                        {
-                            this.ImageList.ImagePathList.SelectedItem = this.ImageList.GetLastFileInfo(this.Parameter.Outdir);
-                        }
-                        else
-                        {
-                            this.ImageList.ImagePathList.SelectedItem = null;
-                        }
+                        // 要素の削除
+                        this.ImageList.RemoveAt(file_info);
+
+                        // 最後の要素を選択
+                        this.ImageList.LastElementSelect();
                     }
                 }
 
@@ -909,8 +838,7 @@ namespace PromptMaker.ViewModels
 
                         foreach (var file in fiAlls)
                         {
-                            //var image = OpenCvSharp.Mat.FromStream(Entry.Open(),OpenCvSharp.ImreadModes.Color);本当はこれを使いたい
-                            var image = OpenCvSharp.Mat.FromImageData((byte[])Converter.ConvertTo(Image.FromFile(file.FullName), typeof(byte[])));
+                            var image = OpenCvSharp.Mat.FromImageData((byte[])Converter.ConvertTo(Image.FromFile(file.FullName), typeof(byte[]))!);
                             Writer.Write(image);
                         }
                     }
