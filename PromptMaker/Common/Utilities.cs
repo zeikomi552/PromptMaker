@@ -19,6 +19,8 @@ using System.Runtime.CompilerServices;
 using Pen = System.Drawing.Pen;
 using Color = System.Drawing.Color;
 using System.Text.RegularExpressions;
+using OpenCvSharp;
+using Rect = System.Windows.Rect;
 
 namespace PromptMaker.Common
 {
@@ -443,6 +445,204 @@ namespace PromptMaker.Common
                     count++;
                 }
             }
+        }
+
+        /// <summary>
+        /// グレースケール
+        /// </summary>
+        /// <param name="fileName">ファイルパス</param>
+        /// <returns>ビットマップ値</returns>
+        public static void GrayScale(string fileName, string outfile)
+        {
+            using (Bitmap bitmap = new Bitmap(fileName))
+            {
+                int w = bitmap.Width;
+                int h = bitmap.Height;
+                byte[,] data = new byte[w, h];
+
+                // bitmapクラスの画像pixel値を配列に挿入
+                for (int i = 0; i < h; i++)
+                {
+                    for (int j = 0; j < w; j++)
+                    {
+                        // グレイスケール変換処理
+                        data[j, i] = (byte)((bitmap.GetPixel(j, i).R * 0.2126 + bitmap.GetPixel(j, i).B * 0.0722 + bitmap.GetPixel(j, i).G) * 0.7152);///(byte)((bitmap.GetPixel(j, i).R + bitmap.GetPixel(j, i).B + bitmap.GetPixel(j, i).G) / 3);
+                        bitmap.SetPixel(j, i, Color.FromArgb(data[j, i], data[j, i], data[j, i]));
+                    }
+                }
+
+                bitmap.Save(outfile);
+            }
+        }
+        static Random _rand = new Random();
+        public static void Binarization(string fileName, string outfile, byte threshold = 128, bool reverse_f = false)
+        {
+            
+            using (Bitmap bitmap = new Bitmap(fileName))
+            {
+                int w = bitmap.Width;
+                int h = bitmap.Height;
+                byte[,] data = new byte[w, h];
+
+                // bitmapクラスの画像pixel値を配列に挿入
+                for (int i = 0; i < h; i++)
+                {
+                    for (int j = 0; j < w; j++)
+                    {
+                        var color = bitmap.GetPixel(j, i);
+                        // グレイスケール変換処理
+                        data[j, i] = (byte)((color.R * 0.2126 + color.B * 0.0722 + color.G) * 0.7152);
+
+
+
+                        if (!reverse_f)
+                        {
+                            // 閾値による判定
+                            if (data[j, i] >= threshold)
+                            {
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 255, 255, 255));    // 黒のセット
+                            }
+                            else
+                            {
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 0, 0, 0));          // 白のセット
+                            }
+                        }
+                        else
+                        {
+                            // 閾値による判定
+                            if (data[j, i] >= threshold)
+                            {
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 0, 0, 0));          // 白のセット
+                            }
+                            else
+                            {
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 255, 255, 255));    // 黒のセット
+                            }
+                        }
+                    }
+                }
+
+                bitmap.Save(outfile);
+            }
+        }
+
+        public static void RGBNoise(string fileName, string outfile, byte threshold = 128, bool reverse_f = false)
+        {
+            using (Bitmap bitmap = new Bitmap(fileName))
+            {
+                int w = bitmap.Width;
+                int h = bitmap.Height;
+                byte[,] data = new byte[w, h];
+
+                // bitmapクラスの画像pixel値を配列に挿入
+                for (int i = 0; i < h; i++)
+                {
+                    for (int j = 0; j < w; j++)
+                    {
+                        var color = bitmap.GetPixel(j, i);
+                        // グレイスケール変換処理
+                        data[j, i] = (byte)((color.R * 0.2126 + color.B * 0.0722 + color.G) * 0.7152);
+
+                        if (!reverse_f)
+                        {
+                            // 閾値による判定
+                            if (data[j, i] >= threshold)
+                            {
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 255, 255, 255));    // ノイズのセット
+                            }
+                            else
+                            {
+                                bitmap.SetPixel(j, i, color);          // 白のセット
+                            }
+                        }
+                        else
+                        {
+                            // 閾値による判定
+                            if (data[j, i] >= threshold)
+                            {
+                                bitmap.SetPixel(j, i, color);          // 白のセット
+                            }
+                            else
+                            {
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 255, 255, 255));    // ノイズのセット
+                            }
+                        }
+                    }
+                }
+
+                bitmap.Save(outfile);
+            }
+        }
+
+        /// <summary>
+        /// チャネル入れ替え
+        /// </summary>
+        /// <param name="fileName">ファイルパス</param>
+        /// <returns>ビットマップ値</returns>
+        public static void ChanelChangeBGR(string fileName, string outfile)
+        {
+            using (Bitmap bitmap = new Bitmap(fileName))
+            {
+                int w = bitmap.Width;
+                int h = bitmap.Height;
+                byte[,] data = new byte[w, h];
+
+                // bitmapクラスの画像pixel値を配列に挿入
+                for (int i = 0; i < h; i++)
+                {
+                    for (int j = 0; j < w; j++)
+                    {
+                        bitmap.SetPixel(j, i, Color.FromArgb(bitmap.GetPixel(j, i).G, bitmap.GetPixel(j, i).B, bitmap.GetPixel(j, i).R));
+                    }
+                }
+                bitmap.Save(outfile);
+            }
+        }
+
+        /// <summary>
+        /// 明るさの変更
+        /// </summary>
+        /// <param name="bmp">ファイル名</param>
+        /// <param name="bright">明るさ</param>
+        /// <returns>ビットマップ</returns>
+        public static Bitmap BrightnessChange(string fileName, int bright)
+        {
+            using (Bitmap bmp = new Bitmap(fileName))
+            {
+                // 画像データの幅と高さを取得
+                int w = bmp.Width;
+                int h = bmp.Height;
+                byte[,] data = new byte[w, h];
+                byte[,] brightdata = new byte[w, h];
+
+                for (int i = 0; i < h; i++)
+                {
+                    for (int j = 0; j < w; j++)
+                    {
+                        // bmpのデータを取得
+                        data[j, i] = (byte)((bmp.GetPixel(j, i).R + bmp.GetPixel(j, i).B + bmp.GetPixel(j, i).G) / 3);
+
+                        // 明るさ変更処理
+                        if ((int)data[j, i] + bright >= 256)
+                        {
+                            brightdata[j, i] = 255;
+                        }
+                        else if ((int)data[j, i] + bright < 0)
+                        {
+                            brightdata[j, i] = 0;
+                        }
+                        else
+                        {
+                            brightdata[j, i] = (byte)(data[j, i] + bright);
+                        }
+                        // bmpに設定
+                        bmp.SetPixel(j, i, Color.FromArgb(brightdata[j, i], brightdata[j, i], brightdata[j, i]));
+                    }
+                }
+                return bmp;
+            }
+
+                
         }
     }
 }

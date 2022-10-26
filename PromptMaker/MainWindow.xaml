@@ -367,6 +367,34 @@
                                             </b:EventTrigger>
                                         </b:Interaction.Triggers>
                                     </Button>
+                                    <Button Margin="5" Grid.Column="2" Content="グレースケール" Width="100">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="GrayScale"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Grid.Column="2" Content="BGR変換" Width="100">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="ChanelChangeBGR"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Grid.Column="2" Content="二値化" Width="100">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="Binarization"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
+                                    <Button Margin="5" Grid.Column="2" Content="RGBノイズ" Width="100">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="Click">
+                                                <b:CallMethodAction TargetObject="{Binding}" MethodName="RGBNoise"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                    </Button>
                                 </StackPanel>
                                 <Grid Grid.Row="1">
                                     <Image Visibility="{Binding Parameter.Txt2ImgF, Converter={StaticResource InverseBooleanConverter}}" Width="{Binding Source.Width, RelativeSource={RelativeSource Self}}"

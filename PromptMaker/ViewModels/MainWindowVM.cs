@@ -736,6 +736,99 @@ namespace PromptMaker.ViewModels
         }
         #endregion
 
+        #region グレースケール
+        /// <summary>
+        /// グレースケール
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ev"></param>
+        public void GrayScale(object sender, EventArgs ev)
+        {
+            try
+            {
+                // 一時フォルダの取得
+                string tempDir = Path.Combine(Path.GetTempPath(), "PromptMaker-Input");
+                string outfile = Path.Combine(tempDir, "example.png");
+
+                Utilities.GrayScale(this.Parameter.InputImageOrgPath, outfile);
+
+                this.Parameter.InitFilePath = String.Empty;
+                this.Parameter.InitFilePath = outfile;
+                Utilities.FileCopy(outfile, this.Parameter.InputImageOrgPath);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+        public void ChanelChangeBGR()
+        {
+            try
+            {
+                // 一時フォルダの取得
+                string tempDir = Path.Combine(Path.GetTempPath(), "PromptMaker-Input");
+                string outfile = Path.Combine(tempDir, "example.png");
+
+                Utilities.ChanelChangeBGR(this.Parameter.InputImageOrgPath, outfile);
+
+                this.Parameter.InitFilePath = String.Empty;
+                this.Parameter.InitFilePath = outfile;
+
+                Utilities.FileCopy(outfile, this.Parameter.InputImageOrgPath);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+
+        /// <summary>
+        /// 二値化
+        /// </summary>
+        public void Binarization()
+        {
+            try
+            {
+                // 一時フォルダの取得
+                string tempDir = Path.Combine(Path.GetTempPath(), "PromptMaker-Input");
+                string outfile = Path.Combine(tempDir, "example.png");
+
+                Utilities.Binarization(this.Parameter.InputImageOrgPath, outfile, 128, true);
+
+                this.Parameter.InitFilePath = String.Empty;
+                this.Parameter.InitFilePath = outfile;
+
+                Utilities.FileCopy(outfile, this.Parameter.InputImageOrgPath);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+
+        public void RGBNoise()
+        {
+            try
+            {
+                // 一時フォルダの取得
+                string tempDir = Path.Combine(Path.GetTempPath(), "PromptMaker-Input");
+                string outfile = Path.Combine(tempDir, "example.png");
+
+                Utilities.RGBNoise(this.Parameter.InputImageOrgPath, outfile, 128, false);
+
+                this.Parameter.InitFilePath = String.Empty;
+                this.Parameter.InitFilePath = outfile;
+
+                Utilities.FileCopy(outfile, this.Parameter.InputImageOrgPath);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+
         #region プロンプトへセット
         /// <summary>
         /// プロンプトへセット
