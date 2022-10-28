@@ -548,7 +548,7 @@ namespace PromptMaker.Common
                             // 閾値による判定
                             if (data[j, i] >= threshold)
                             {
-                                bitmap.SetPixel(j, i, Color.FromArgb(0, 255, 255, 255));    // ノイズのセット
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 0, 255, 0));    // ノイズのセット
                             }
                             else
                             {
@@ -564,7 +564,7 @@ namespace PromptMaker.Common
                             }
                             else
                             {
-                                bitmap.SetPixel(j, i, Color.FromArgb(0, 255, 255, 255));    // ノイズのセット
+                                bitmap.SetPixel(j, i, Color.FromArgb(0, 0, 255, 0));    // ノイズのセット
                             }
                         }
                     }

@@ -330,15 +330,15 @@ namespace PromptMaker.Models
         }
         #endregion
 
-        #region スキップグリッド[Skip_grid]プロパティ
+        #region skip_gridの有効/無効[Skip_grid]プロパティ
         /// <summary>
-        /// スキップグリッド[Skip_grid]プロパティ用変数
+        /// skip_gridの有効/無効[Skip_grid]プロパティ用変数
         /// </summary>
-        int _Skip_grid = 0;
+        bool _Skip_grid = false;
         /// <summary>
-        /// スキップグリッド[Skip_grid]プロパティ
+        /// skip_gridの有効/無効[Skip_grid]プロパティ
         /// </summary>
-        public int Skip_grid
+        public bool Skip_grid
         {
             get
             {
@@ -350,6 +350,31 @@ namespace PromptMaker.Models
                 {
                     _Skip_grid = value;
                     NotifyPropertyChanged("Skip_grid");
+                }
+            }
+        }
+        #endregion
+
+        #region skip_saveの有効/無効[Skip_save]プロパティ
+        /// <summary>
+        /// skip_saveの有効/無効[Skip_save]プロパティ用変数
+        /// </summary>
+        bool _Skip_save = false;
+        /// <summary>
+        /// skip_saveの有効/無効[Skip_save]プロパティ
+        /// </summary>
+        public bool Skip_save
+        {
+            get
+            {
+                return _Skip_save;
+            }
+            set
+            {
+                if (!_Skip_save.Equals(value))
+                {
+                    _Skip_save = value;
+                    NotifyPropertyChanged("Skip_save");
                 }
             }
         }
@@ -751,6 +776,10 @@ namespace PromptMaker.Models
                 }
 
                 command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
+
+                if (this.Skip_grid) command.AppendLine($"--skip_grid");
+                if (this.Skip_save) command.AppendLine($"--skip_save");
+
                 command.AppendLine($"--n_iter {N_iter}");
 
                 // 大きいサイズで作成する場合Optimizeの方を使用する
@@ -1090,6 +1119,7 @@ namespace PromptMaker.Models
                 // 繰り返し回数指定
                 for (int cnt = 0; cnt < this.Repeat; cnt++)
                 {
+                    //this.Ddim_steps = cnt + 1;
                     // プロンプト補助リスト
                     foreach (var composer in this.Parent!.PromptComposerConf.Item.Items)
                     {
@@ -1167,6 +1197,14 @@ namespace PromptMaker.Models
                     }
                 }
 
+
+
+                Stopwatch stwch = new Stopwatch();
+                stwch.Start();
+                // コマンドの実行処理
+                this.CommandExecute();
+                stwch.Stop();
+
                 string path = this.Outdir;
 
                 // テキストファイル出力（新規作成）
@@ -1175,10 +1213,8 @@ namespace PromptMaker.Models
                     sw.WriteLine($"--------");
                     sw.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
                     sw.WriteLine($"Command->{this.CommandBackup}");
+                    sw.WriteLine($"Elapsed Time(msec)->{stwch.Elapsed.TotalMilliseconds}");
                 }
-
-                // コマンドの実行処理
-                this.CommandExecute();
 
                 if (this.ScriptType == ScriptTypeEnum.Inpaint)
                 {

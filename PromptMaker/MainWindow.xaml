@@ -291,6 +291,18 @@
                                             <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
                                             <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.UsePlms}"/>
                                         </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="do not save a grid, only individual samples. Helpful when evaluating lots of samples"
+                                                   TextAlignment="Right" Width="90" Text="skip_grid" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.Skip_grid}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock ToolTip="do not save individual samples. For speed measurements."
+                                                   TextAlignment="Right" Width="90" Text="skip_save" VerticalAlignment="Center" Margin="5"/>
+                                            <TextBlock Text=":" VerticalAlignment="Center" Margin="5"/>
+                                            <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" IsChecked="{Binding Parameter.Skip_save}"/>
+                                        </StackPanel>
 
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock ToolTip="モデル"
