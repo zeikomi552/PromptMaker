@@ -1028,17 +1028,37 @@ namespace PromptMaker.Models
             {
                 StringBuilder command = new StringBuilder();
                 command.AppendLine("python scripts/img2img.py");
-                command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
-                command.AppendLine($"--init-img");
-                command.AppendLine($"{this.InitFilePath}");
-                command.AppendLine($"--n_iter {N_iter}");
                 command.AppendLine($"--strength {this.Strength}");
-                command.AppendLine($"--n_sample {this.N_Samples}");
-                command.AppendLine($"--scale {this.Guidance_Scale}");
-                command.AppendLine($"--outdir {this.Outdir}");
-                //command.AppendLine(this.UsePlms ? "--plms" : "");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
+                command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
+
+                command.AppendLine($"--outdir {this.Outdir}");
+                if (this.Fixed_code) command.AppendLine($"--fixed_code");
+                //command.AppendLine(this.UsePlms ? "--plms" : "");         // plmsはStable Diffusion側で未実装っぽい
+
+
+                if (this.Skip_grid) command.AppendLine($"--skip_grid");
+                if (this.Skip_save) command.AppendLine($"--skip_save");
+
+
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
+                command.AppendLine(this.Ddim_Eta <= 0 ? "" : $"--ddim_eta {this.Ddim_Eta}");
+                command.AppendLine(this.N_iter <= 0 ? "" : $"--n_iter {this.N_iter}");
+                command.AppendLine(this.Channel <= 0 ? "" : $"--C {this.Channel}");
+                command.AppendLine(this.down_sampling_factor <= 0 ? "" : $"--f {this.down_sampling_factor}");
+                command.AppendLine(this.N_Samples <= 0 ? "" : $"--n_samples {this.N_Samples}");
+                command.AppendLine(this.N_Rows <= 0 ? "" : $"--n_rows {this.N_Rows}");
+                command.AppendLine(this.Guidance_Scale <= 0 ? "" : $"--scale {this.Guidance_Scale}");
+                // 数値指定系のパラメータ
+                if (this.Precision.HasValue)
+                {
+                    command.AppendLine(this.Precision.Value ? $"--precision \"autocast\"" : $"--precision \"full\"");
+                }
+
+                command.AppendLine(!string.IsNullOrWhiteSpace(this.PromptFile) ? $"--from-file {this.PromptFile}" : "");
+                command.AppendLine(!string.IsNullOrWhiteSpace(this.CkptPath) ? $"--ckpt {this.CkptPath}" : "");
+                command.AppendLine($"--init-img \"{this.InitFilePath}\"");
+
 
                 return command.ToString().Replace("\r\n", " ");
             }
@@ -1366,7 +1386,7 @@ namespace PromptMaker.Models
                 // 繰り返し回数指定
                 for (int cnt = 0; cnt < this.Repeat; cnt++)
                 {
-                    //this.Guidance_Scale = cnt * (decimal)0.5;
+                    //this.Strength = cnt * (decimal)0.1;
 
                     // プロンプト補助リスト
                     foreach (var composer in this.Parent!.PromptComposerConf.Item.Items)
