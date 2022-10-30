@@ -19,6 +19,9 @@ using System.Windows.Ink;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using PromptMaker.ViewModels;
+using OpenCvSharp;
+using Rect = System.Windows.Rect;
+using Window = System.Windows.Window;
 
 namespace PromptMaker.Models
 {
@@ -205,6 +208,33 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region チャネル[Channel]プロパティ
+        /// <summary>
+        /// チャネル[Channel]プロパティ用変数
+        /// </summary>
+        int _Channel = 4;
+        /// <summary>
+        /// チャネル[Channel]プロパティ
+        /// </summary>
+        public int Channel
+        {
+            get
+            {
+                return _Channel;
+            }
+            set
+            {
+                if (!_Channel.Equals(value))
+                {
+                    _Channel = value;
+                    NotifyPropertyChanged("Channel");
+                }
+            }
+        }
+        #endregion
+
+
+
         #region Seed(0:ランダム 1～固定)[Seed]プロパティ
         /// <summary>
         /// Seed(0:ランダム 1～固定)[Seed]プロパティ用変数
@@ -379,6 +409,133 @@ namespace PromptMaker.Models
             }
         }
         #endregion
+
+        #region fixed_codeの有効/無効[Fixed_code]プロパティ
+        /// <summary>
+        /// fixed_codeの有効/無効[Fixed_code]プロパティ用変数
+        /// </summary>
+        bool _Fixed_code = false;
+        /// <summary>
+        /// fixed_codeの有効/無効[Fixed_code]プロパティ
+        /// </summary>
+        public bool Fixed_code
+        {
+            get
+            {
+                return _Fixed_code;
+            }
+            set
+            {
+                if (!_Fixed_code.Equals(value))
+                {
+                    _Fixed_code = value;
+                    NotifyPropertyChanged("Fixed_code");
+                }
+            }
+        }
+        #endregion
+
+        #region LAION400Mの使用の有効/無効[Laion400M]プロパティ
+        /// <summary>
+        /// LAION400Mの使用の有効/無効[Laion400M]プロパティ用変数
+        /// </summary>
+        bool _Laion400M = false;
+        /// <summary>
+        /// LAION400Mの使用の有効/無効[Laion400M]プロパティ
+        /// </summary>
+        public bool Laion400M
+        {
+            get
+            {
+                return _Laion400M;
+            }
+            set
+            {
+                if (!_Laion400M.Equals(value))
+                {
+                    _Laion400M = value;
+                    NotifyPropertyChanged("Laion400M");
+                }
+            }
+        }
+        #endregion
+
+        #region DDIM_Etaの値(0.0～1.0)[Ddim_Eta]プロパティ
+        /// <summary>
+        /// DDIM_Etaの値(0.0～1.0)[Ddim_Eta]プロパティ用変数
+        /// </summary>
+        decimal _Ddim_Eta = (decimal)0.0;
+        /// <summary>
+        /// DDIM_Etaの値(0.0～1.0)[Ddim_Eta]プロパティ
+        /// </summary>
+        public decimal Ddim_Eta
+        {
+            get
+            {
+                return _Ddim_Eta;
+            }
+            set
+            {
+                if (!_Ddim_Eta.Equals(value))
+                {
+                    _Ddim_Eta = value;
+                    NotifyPropertyChanged("Ddim_Eta");
+                }
+            }
+        }
+        #endregion
+
+        #region パラメータfの値[down_sampling_factor]プロパティ
+        /// <summary>
+        /// パラメータfの値[down_sampling_factor]プロパティ用変数
+        /// </summary>
+        int _down_sampling_factor = 8;
+        /// <summary>
+        /// パラメータfの値[down_sampling_factor]プロパティ
+        /// </summary>
+        public int down_sampling_factor
+        {
+            get
+            {
+                return _down_sampling_factor;
+            }
+            set
+            {
+                if (!_down_sampling_factor.Equals(value))
+                {
+                    _down_sampling_factor = value;
+                    NotifyPropertyChanged("down_sampling_factor");
+                }
+            }
+        }
+        #endregion
+
+        #region プロンプトファイル[PromptFile]プロパティ
+        /// <summary>
+        /// プロンプトファイル[PromptFile]プロパティ用変数
+        /// </summary>
+        string _PromptFile = string.Empty;
+        /// <summary>
+        /// プロンプトファイル[PromptFile]プロパティ
+        /// </summary>
+        public string PromptFile
+        {
+            get
+            {
+                return _PromptFile;
+            }
+            set
+            {
+                if (_PromptFile == null || !_PromptFile.Equals(value))
+                {
+                    _PromptFile = value;
+                    NotifyPropertyChanged("PromptFile");
+                }
+            }
+        }
+        #endregion
+
+
 
         #region 実行後のコマンドを保存しておく領域[CommandBackup]プロパティ
         /// <summary>
@@ -572,36 +729,11 @@ namespace PromptMaker.Models
         }
         #endregion
 
-        #region サンプル数[N_Sample]プロパティ
-        /// <summary>
-        /// サンプル数[N_Sample]プロパティ用変数
-        /// </summary>
-        int _N_Sample = 3;
-        /// <summary>
-        /// サンプル数[N_Sample]プロパティ
-        /// </summary>
-        public int N_Sample
-        {
-            get
-            {
-                return _N_Sample;
-            }
-            set
-            {
-                if (!_N_Sample.Equals(value))
-                {
-                    _N_Sample = value;
-                    NotifyPropertyChanged("N_Sample");
-                }
-            }
-        }
-        #endregion
-
         #region 作成回数[N_iter]プロパティ
         /// <summary>
         /// 作成回数[N_iter]プロパティ用変数
         /// </summary>
-        int _N_iter = 3;
+        int _N_iter = 2;
         /// <summary>
         /// 作成回数[N_iter]プロパティ
         /// </summary>
@@ -722,6 +854,84 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region 画像出力数[N_Samples]プロパティ
+        /// <summary>
+        /// 画像出力数[N_Samples]プロパティ用変数
+        /// </summary>
+        int _N_Samples = 3;
+        /// <summary>
+        /// 画像出力数[N_Samples]プロパティ
+        /// </summary>
+        public int N_Samples
+        {
+            get
+            {
+                return _N_Samples;
+            }
+            set
+            {
+                if (!_N_Samples.Equals(value))
+                {
+                    _N_Samples = value;
+                    NotifyPropertyChanged("N_Samples");
+                }
+            }
+        }
+        #endregion
+
+        #region グリッド行数[N_Rows]プロパティ
+        /// <summary>
+        /// グリッド行数[N_Rows]プロパティ用変数
+        /// </summary>
+        int _N_Rows = 0;
+        /// <summary>
+        /// グリッド行数[N_Rows]プロパティ
+        /// </summary>
+        public int N_Rows
+        {
+            get
+            {
+                return _N_Rows;
+            }
+            set
+            {
+                if (!_N_Rows.Equals(value))
+                {
+                    _N_Rows = value;
+                    NotifyPropertyChanged("N_Rows");
+                }
+            }
+        }
+        #endregion
+
+        #region --precision "autocast" or "full" デフォルト autocast[Precision]プロパティ
+        /// <summary>
+        /// --precision "autocast" or "full" デフォルト autocast[Precision]プロパティ用変数
+        /// </summary>
+        bool? _Precision = null;
+        /// <summary>
+        /// --precision "autocast" or "full" デフォルト autocast[Precision]プロパティ
+        /// </summary>
+        public bool? Precision
+        {
+            get
+            {
+                return _Precision;
+            }
+            set
+            {
+                if (_Precision == null || !_Precision.Equals(value))
+                {
+                    _Precision = value;
+                    NotifyPropertyChanged("Precision");
+                }
+            }
+        }
+        #endregion
+
+
+
+
         Random _Rand = new Random();
 
         #region コマンド
@@ -766,36 +976,45 @@ namespace PromptMaker.Models
                 StringBuilder command = new StringBuilder();
 
                 // 大きいサイズで作成する場合Optimizeの方を使用する
-                if (!this.HugeSizeF)
-                {
-                    command.AppendLine("python scripts/txt2img.py");
-                }
-                else
-                {
-                    command.AppendLine("python optimizedSD/optimized_txt2img.py");
-                }
+                if (!this.HugeSizeF) command.AppendLine("python scripts/txt2img.py");
+                else command.AppendLine("python optimizedSD/optimized_txt2img.py");
 
-                command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
-
+                // ON/OFF系パラメータ
                 if (this.Skip_grid) command.AppendLine($"--skip_grid");
                 if (this.Skip_save) command.AppendLine($"--skip_save");
-
-                command.AppendLine($"--n_iter {N_iter}");
-
+                if (this.Fixed_code) command.AppendLine($"--fixed_code");
+                if (this.Laion400M) command.AppendLine($"--laion400m");
+                if (this.UsePlms) command.AppendLine($"--plms");
                 // 大きいサイズで作成する場合Optimizeの方を使用する
                 // 高速化のためturboを立てる
-                if (this.HugeSizeF)
+                if (this.HugeSizeF) command.AppendLine($"--turbo");
+
+                // 数値指定系のパラメータ
+                if (this.Precision.HasValue)
                 {
-                    command.AppendLine($"--turbo");
+                    command.AppendLine(this.Precision.Value ? $"--precision \"autocast\"" : $"--precision \"full\"");
                 }
+                command.AppendLine(this.N_iter <= 0 ? "" : $"--n_iter {this.N_iter}");
                 command.AppendLine(this.Width <= 0 ? "" : $"--W {this.Width}");
                 command.AppendLine(this.Height <= 0 ? "" : $"--H {this.Height}");
+                command.AppendLine(this.Guidance_Scale <= 0 ? "" : $"--scale {this.Guidance_Scale}");
+                command.AppendLine(this.Channel <= 0 ? "" : $"--C {this.Channel}");
+                command.AppendLine(this.N_Rows <= 0 ? "" : $"--n_rows {this.N_Rows}");
+                command.AppendLine(this.down_sampling_factor <= 0 ? "" : $"--f {this.down_sampling_factor}");
                 command.AppendLine(this.Seed <= 0 ? $"--seed {_Rand.Next(1, 99999)}" : $"--seed {this.Seed}");
                 command.AppendLine(this.Ddim_steps <= 0 ? "" : $"--ddim_steps {this.Ddim_steps}");
-                command.AppendLine(this.UsePlms ? "--plms" : "");
-                command.AppendLine($"--outdir {this.Outdir}");
-                command.AppendLine(!string.IsNullOrWhiteSpace(this.CkptPath) ? $"--ckpt {this.CkptPath}" : "");
+                command.AppendLine(this.N_Samples <= 0 ? "" : $"--n_samples {this.N_Samples}");
+                command.AppendLine(this.Ddim_Eta <= 0 ? "" : $"--ddim_eta {this.Ddim_Eta}");
 
+                // パス指定系のパラメータ
+                command.AppendLine($"--outdir \"{this.Outdir}\"");
+                command.AppendLine(!string.IsNullOrWhiteSpace(this.CkptPath) ? $"--ckpt {this.CkptPath}" : "");
+                command.AppendLine(!string.IsNullOrWhiteSpace(this.PromptFile) ? $"--from-file {this.PromptFile}" : "");
+
+                // プロンプト
+                command.AppendLine($"--prompt \"{this.Prompt.Trim()}\"");
+
+                // 改行をスペースに置き換え
                 return command.ToString().Replace("\r\n", " ");
             }
         }
@@ -814,7 +1033,7 @@ namespace PromptMaker.Models
                 command.AppendLine($"{this.InitFilePath}");
                 command.AppendLine($"--n_iter {N_iter}");
                 command.AppendLine($"--strength {this.Strength}");
-                command.AppendLine($"--n_sample {this.N_Sample}");
+                command.AppendLine($"--n_sample {this.N_Samples}");
                 command.AppendLine($"--scale {this.Guidance_Scale}");
                 command.AppendLine($"--outdir {this.Outdir}");
                 //command.AppendLine(this.UsePlms ? "--plms" : "");
@@ -1012,6 +1231,34 @@ namespace PromptMaker.Models
         }
         #endregion
 
+        #region ファイルを開くダイアログ
+        /// <summary>
+        /// ファイルを開くダイアログ
+        /// </summary>
+        public void OpenPromptFile()
+        {
+            try
+            {
+                // ダイアログのインスタンスを生成
+                var dialog = new OpenFileDialog();
+
+                // ファイルの種類を設定
+                dialog.Filter = "プロンプトファイル (*.txt)|*.txt";
+
+                // ダイアログを表示する
+                if (dialog.ShowDialog() == true)
+                {
+                    this.PromptFile = dialog.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowErrorOK(ex.Message, "Error");
+            }
+        }
+        #endregion
+
+
         #region コマンド実行処理
         /// <summary>
         /// コマンド実行処理
@@ -1119,7 +1366,8 @@ namespace PromptMaker.Models
                 // 繰り返し回数指定
                 for (int cnt = 0; cnt < this.Repeat; cnt++)
                 {
-                    //this.Ddim_steps = cnt + 1;
+                    //this.Guidance_Scale = cnt * (decimal)0.5;
+
                     // プロンプト補助リスト
                     foreach (var composer in this.Parent!.PromptComposerConf.Item.Items)
                     {
@@ -1214,6 +1462,10 @@ namespace PromptMaker.Models
                     sw.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
                     sw.WriteLine($"Command->{this.CommandBackup}");
                     sw.WriteLine($"Elapsed Time(msec)->{stwch.Elapsed.TotalMilliseconds}");
+
+                    var filepath = Directory.GetFiles(path).OrderByDescending(n => n).ToArray().FirstOrDefault()!;
+
+                    Utilities.SetDetail(filepath, this.CommandBackup.Replace($"--outdir \"{this.Outdir}\"", ""), this.UsePlms ? "plms" : "non_plms");
                 }
 
                 if (this.ScriptType == ScriptTypeEnum.Inpaint)
